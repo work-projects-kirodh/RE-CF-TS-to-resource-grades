@@ -1,0 +1,7 @@
+.idea/*
+.git
+
+capacity_factors_world_atlas/*
+capacity_factors_atlite
+
+.env
