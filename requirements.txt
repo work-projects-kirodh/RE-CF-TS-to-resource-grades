@@ -10,3 +10,4 @@ shapely~=2.0.2
 folium~=0.15.0
 pillow~=8.3.1
 pyproj~=3.3.1
+python-dotenv
