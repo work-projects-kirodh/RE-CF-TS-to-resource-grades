@@ -18,6 +18,7 @@ import os
 import temporary_data as temp_data
 from dash import dash_table
 import copy
+from collections import Counter
 
 ################################
 # Check geometries, inside or outside bounding box
@@ -449,7 +450,17 @@ graph_and_table = html.Div([
     html.Div(id='index-status',
              style={'text-align': 'center', 'margin-left': '10vw', 'margin-right': '10vw', 'margin-top': '5vw'}),
 
+    # Generating final capacity factors
+    html.Div(id='capacity-factor-status',
+             style={'text-align': 'center', 'margin-left': '10vw', 'margin-right': '10vw', 'margin-top': '5vw'}),
+
 ],style={'text-align': 'center'})
+
+# conform dialogue:
+confirm_dialogue = dcc.ConfirmDialog(
+        id='confirm-file-save',
+        message="File saved to " + os.environ.get("FINAL_CAPACITY_FILE")+". RELOADING...",
+    ),
 
 
 #######################################
@@ -471,7 +482,7 @@ app.layout = html.Div([
     spacing,
     graph_and_table,
     spacing,
-    footer
+    footer,
 ])
 
 
@@ -482,32 +493,62 @@ app.layout = html.Div([
 
 # Callback to update missing and overlapping indexes
 @app.callback(
-    Output('index-status', 'children'),
+    [Output('index-status', 'children'),
+     Output('capacity-factor-button','disabled')],
     Input('index-table', 'data'),
 )
-def update_index_status(data):
-    # # Filter out rows with empty values
-    # filtered_data = [row for row in data if all(row.values())]
-    #
-    # # Extract entries with integer first and second indexes
-    # integer_entries = [(int(row['first_index']), int(row['second_index'])) for row in filtered_data
-    #                    if row['first_index'].isdigit() and row['second_index'].isdigit()]
-    #
-    # # Extract all unique indexes
-    # all_indexes = set(index for entry in integer_entries for index in entry)
-    #
-    # # Calculate missing and overlapping indexes
-    # missing_indexes = set(range(len(tiers))) - all_indexes
-    # overlapping_indexes = set(index for index in all_indexes if all_indexes.count(index) > 1)
-    #
-    # # Display missing indexes in green and overlapping indexes in red
-    # status_text = [
-    #     html.Span(f'Missing Indexes: {missing_indexes}', style={'color': 'green'}),
-    #     html.Br(),
-    #     html.Span(f'Overlapping Indexes: {overlapping_indexes}', style={'color': 'red'}),
-    # ]
-    status_text = ""
-    return status_text
+def update_index_status(table_data):
+    # Get the number of rows in the tiers DataFrame
+    tier_indexes = list(np.arange(len(tiers[tiers.columns[0]])))
+    all_indexes = [] # empty for adding indexes
+
+    # find max for tier, so if index over this value then discard
+    max_tier_index = max(tier_indexes)
+
+    # Filter out rows with empty values
+    filtered_data = [row for row in table_data if all(row.values())]
+    # print("Filtered data: ",filtered_data)
+
+    if filtered_data != []:
+        # data = []
+        for idx,row in enumerate(filtered_data):
+            # print(row)
+            try:
+                first_index = int(row['first_index'])
+                second_index = int(row['second_index'])
+            except Exception as e:
+                continue
+
+            # Check if indexes are integers and firstindex is smaller than secondindex
+            if first_index < second_index:
+                index_range = list(range(first_index, second_index + 1))
+                if any(value > max_tier_index for value in index_range) or any(value < 0 for value in index_range): # check if there is an out of bounds error, larger than the max, or smaller than 0
+                    continue
+                # add the numbers to all_indexes list
+                all_indexes += index_range
+                # print("all_indexes: ",all_indexes)
+
+    # Find remaining indexes in tier_index_list
+    missing_indexes = list(set(tier_indexes) - set(all_indexes))
+
+    # overlaps
+    overlapping_indexes = [item for item, count in Counter(all_indexes).items() if count > 1]
+
+    # Display missing indexes in green and overlapping indexes in red
+    status_text = [
+        html.Span(f'Missing Indexes: {missing_indexes}', style={'color': 'green'}),
+        html.Br(),
+        html.Span(f'Overlapping Indexes: {overlapping_indexes}', style={'color': 'red'}),
+    ]
+    # status_text = ""
+
+    # condition to make the button to generate tiers
+    if len(missing_indexes) == 0 and len(overlapping_indexes) == 0:
+        create_tier = False
+    else:
+        create_tier = True
+
+    return status_text,create_tier
 
 
 # Callback to update the graph based on table data
@@ -539,9 +580,12 @@ def update_graph(table_data):
             # Check if indexes are integers and firstindex is smaller than secondindex
             # if isinstance(first_index, int) and isinstance(second_index, int) and first_index < second_index:
             if first_index < second_index:
-                index_range = range(first_index, second_index + 1)
-                extracted_data = tiers.loc[index_range, row['tier']]
-                print("Extracted data:", extracted_data)
+                try:
+                    index_range = range(first_index, second_index + 1)
+                    extracted_data = tiers.loc[index_range, row['tier']]
+                    # print("Extracted data:", extracted_data)
+                except Exception as e: # indexes are over or under the index of the tier data
+                    continue
 
                 # Create a trace for the graph
                 trace = dict(
@@ -553,38 +597,10 @@ def update_graph(table_data):
                     # name=f'Piece {idx + 1}',
                 )
 
-                print("number of traces: ",len(temp_fig["data"]))
+                # print("number of traces: ",len(temp_fig["data"]))
                 # Append the new trace to the existing data
                 temp_fig['data'].append(trace)
 
-        # # get tier and extract the data:
-        # specific_tier = tiers[row["tier"]]
-        # # get the rangeof rows
-        # pass
-
-        # # Extract selected tiers and indices
-        # the_tiers = [row['tier'] for row in filtered_data]
-        # print("the_tiers", the_tiers)
-
-        # try:
-        #     indices = [(int(row['first_index']), int(row['second_index'])) for row in filtered_data]
-        # except TypeError:
-        #     indices = (0, 0)  # Provide default values or handle accordingly
-
-        # indices = [(int(row['first_index']), int(row['second_index'])) for row in filtered_data]
-
-        # # Create line traces
-        # traces = [dict(x=list(range(len(the_tiers))), y=tiers[tier], name=tier) for tier in the_tiers]
-
-        # # Create graph layout
-        # layout = dict(
-        #     title='Atlite Tiers',
-        #     xaxis=dict(title='Index'),
-        #     yaxis=dict(title='Scaled Capacity factor (MW/MW)'),
-        #     legend=dict(orientation='h'),
-        # )
-
-    # print("orig_fig: ",orig_fig)
     # return dict(data=temp_fig["data"], layout=temp_fig["layout"])
     return temp_fig
 
@@ -603,24 +619,59 @@ def add_row(n_clicks,table_data):
     return table_data
 
 
-# Callback to update button disabled property
+# todo Callback to generate tiers
 @app.callback(
-    Output('capacity-factor-button', 'disabled'),
-    Input('table', 'data'),
+    Output('capacity-factor-status', 'children'),
+    Input('capacity-factor-button', 'n_clicks'),
+    State('index-table', 'data'),
+    # prevent_initial_call=True
 )
-def update_button_disabled(data):
-    # Similar logic as the index status callback to determine button state
-    # filtered_data = [row for row in data if all(row.values())]
-    # integer_entries = [(int(row['first_index']), int(row['second_index'])) for row in filtered_data
-    #                    if row['first_index'].isdigit() and row['second_index'].isdigit()]
-    # all_indexes = set(index for entry in integer_entries for index in entry)
-    # missing_indexes = set(range(len(tiers))) - all_indexes
-    # overlapping_indexes = set(index for index in all_indexes if all_indexes.count(index) > 1)
+def generate_tiers(n_clicks,table_data):
+    if n_clicks > 0:
+        # shells for data
+        final_capacity = pd.DataFrame(columns=["time_step","capacity_factor"])
 
-    # return len(missing_indexes) == 0 and len(overlapping_indexes) == 0
-    return True
+        # Filter out rows with empty values
+        filtered_data = [row for row in table_data if all(row.values())]
+        # print("Filtered data: ",filtered_data)
 
+        if filtered_data != []:
+            for idx, row in enumerate(filtered_data):
+                try:
+                    first_index = int(row['first_index'])
+                    second_index = int(row['second_index'])
+                except Exception as e:
+                    continue
 
+                # Check if indexes are integers and first index is smaller than second index
+                if first_index < second_index:
+                    try:
+                        index_range = range(first_index, second_index + 1)
+                        extracted_data = tiers.loc[index_range, row['tier']]
+                        # print("Extracted data:", extracted_data)
+
+                        ## construct the pandas dataframe:
+                        # Create a DataFrame from extracted data
+                        extracted_df = pd.DataFrame({
+                            "time_step": list(index_range),
+                            "capacity_factor": extracted_data.tolist()
+                        })
+
+                        # Concatenate the new DataFrame with final_capacity
+                        final_capacity = pd.concat([final_capacity, extracted_df], ignore_index=True)
+
+                    except Exception as e:  # indexes are over or under the index of the tier data
+                        continue
+
+        # Reorder the rows based on the index column in ascending order
+        final_capacity_sorted = final_capacity.sort_values(by='time_step')
+
+        # store as csv
+        print("saving file to ", os.environ.get("FINAL_CAPACITY_FILE"))
+        final_capacity_sorted.to_csv(os.environ.get("FINAL_CAPACITY_FILE"),index=False)
+        return "File saved to " + os.environ.get("FINAL_CAPACITY_FILE")+". RELOADING..."
+    else:
+        return ""
 
 if __name__ == '__main__':
     app.run_server(debug=True)
