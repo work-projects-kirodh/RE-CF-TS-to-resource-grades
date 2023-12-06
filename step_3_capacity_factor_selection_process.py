@@ -17,6 +17,7 @@ import xarray as xr
 import os
 import temporary_data as temp_data
 from dash import dash_table
+import copy
 
 ################################
 # Check geometries, inside or outside bounding box
@@ -398,7 +399,7 @@ layout = dict(
 )
 
 # Plotly figure
-fig = dict(data=traces, layout=layout)
+orig_fig = dict(data=traces, layout=layout)
 
 # Initial table rows for table
 initial_rows = 5
@@ -407,7 +408,7 @@ graph_and_table = html.Div([
 
     html.Div([
     # Graph
-    dcc.Graph(id='tier-graph',figure=fig),
+    dcc.Graph(id='tier-graph',figure=orig_fig),
     ],style={'text-align': 'center','margin-left': '10vw','margin-right': '10vw'}),
 
 
@@ -440,7 +441,7 @@ graph_and_table = html.Div([
     ],style={'text-align': 'center','margin-left': '30vw','margin-right': '30vw'}),
 
 
-    # Add row button
+    # Generate the final capacity factors and save to a file when this button is clicked
     html.Button('Generate Final Capacity Factors', id='capacity-factor-button', n_clicks=0,disabled=True,
                 style={'margin-top': '10px', 'background-color': '#87CEFA', 'padding': '10px', 'width': '200px'}),
 
@@ -485,27 +486,27 @@ app.layout = html.Div([
     Input('index-table', 'data'),
 )
 def update_index_status(data):
-    # Filter out rows with empty values
-    filtered_data = [row for row in data if all(row.values())]
-
-    # Extract entries with integer first and second indexes
-    integer_entries = [(int(row['first_index']), int(row['second_index'])) for row in filtered_data
-                       if row['first_index'].isdigit() and row['second_index'].isdigit()]
-
-    # Extract all unique indexes
-    all_indexes = set(index for entry in integer_entries for index in entry)
-
-    # Calculate missing and overlapping indexes
-    missing_indexes = set(range(len(tiers))) - all_indexes
-    overlapping_indexes = set(index for index in all_indexes if all_indexes.count(index) > 1)
-
-    # Display missing indexes in green and overlapping indexes in red
-    status_text = [
-        html.Span(f'Missing Indexes: {missing_indexes}', style={'color': 'green'}),
-        html.Br(),
-        html.Span(f'Overlapping Indexes: {overlapping_indexes}', style={'color': 'red'}),
-    ]
-
+    # # Filter out rows with empty values
+    # filtered_data = [row for row in data if all(row.values())]
+    #
+    # # Extract entries with integer first and second indexes
+    # integer_entries = [(int(row['first_index']), int(row['second_index'])) for row in filtered_data
+    #                    if row['first_index'].isdigit() and row['second_index'].isdigit()]
+    #
+    # # Extract all unique indexes
+    # all_indexes = set(index for entry in integer_entries for index in entry)
+    #
+    # # Calculate missing and overlapping indexes
+    # missing_indexes = set(range(len(tiers))) - all_indexes
+    # overlapping_indexes = set(index for index in all_indexes if all_indexes.count(index) > 1)
+    #
+    # # Display missing indexes in green and overlapping indexes in red
+    # status_text = [
+    #     html.Span(f'Missing Indexes: {missing_indexes}', style={'color': 'green'}),
+    #     html.Br(),
+    #     html.Span(f'Overlapping Indexes: {overlapping_indexes}', style={'color': 'red'}),
+    # ]
+    status_text = ""
     return status_text
 
 
@@ -513,33 +514,79 @@ def update_index_status(data):
 @app.callback(
     Output('tier-graph', 'figure'),
     Input('index-table', 'data'),
-    State('tier-graph', 'figure')
+    # State('tier-graph', 'figure')
+    prevent_initial_call=True
 )
-def update_graph(data,previous_fig):
+def update_graph(table_data):
+    # print("I am here")
+    # set the figure to original
+    temp_fig = copy.deepcopy(orig_fig)
+
     # Filter out rows with empty values
-    filtered_data = [row for row in data if all(row.values())]
+    filtered_data = [row for row in table_data if all(row.values())]
+    # print("Filtered data: ",filtered_data)
 
-    # Extract selected tiers and indices
-    tiers = [row['tier'] for row in filtered_data]
-    try:
-        indices = [(int(row['first_index']), int(row['second_index'])) for row in filtered_data]
-    except TypeError:
-        indices = (0, 0)  # Provide default values or handle accordingly
+    if filtered_data != []:
+        # data = []
+        for idx,row in enumerate(filtered_data):
+            # print(row)
+            try:
+                first_index = int(row['first_index'])
+                second_index = int(row['second_index'])
+            except Exception as e:
+                continue
 
-    # indices = [(int(row['first_index']), int(row['second_index'])) for row in filtered_data]
+            # Check if indexes are integers and firstindex is smaller than secondindex
+            # if isinstance(first_index, int) and isinstance(second_index, int) and first_index < second_index:
+            if first_index < second_index:
+                index_range = range(first_index, second_index + 1)
+                extracted_data = tiers.loc[index_range, row['tier']]
+                print("Extracted data:", extracted_data)
 
-    # Create line traces
-    traces = [dict(x=list(range(len(tiers))), y=tiers[tier], name=tier) for tier in tiers]
+                # Create a trace for the graph
+                trace = dict(
+                    x=list(index_range),
+                    y=list(extracted_data),
+                    mode='lines+markers',
+                    line=dict(color='black'),
+                    showlegend=False,
+                    # name=f'Piece {idx + 1}',
+                )
 
-    # Create graph layout
-    layout = dict(
-        title='Atlite Tiers',
-        xaxis=dict(title='Index'),
-        yaxis=dict(title='Scaled Capacity factor (MW/MW)'),
-        legend=dict(orientation='h'),
-    )
+                print("number of traces: ",len(temp_fig["data"]))
+                # Append the new trace to the existing data
+                temp_fig['data'].append(trace)
 
-    return previous_fig
+        # # get tier and extract the data:
+        # specific_tier = tiers[row["tier"]]
+        # # get the rangeof rows
+        # pass
+
+        # # Extract selected tiers and indices
+        # the_tiers = [row['tier'] for row in filtered_data]
+        # print("the_tiers", the_tiers)
+
+        # try:
+        #     indices = [(int(row['first_index']), int(row['second_index'])) for row in filtered_data]
+        # except TypeError:
+        #     indices = (0, 0)  # Provide default values or handle accordingly
+
+        # indices = [(int(row['first_index']), int(row['second_index'])) for row in filtered_data]
+
+        # # Create line traces
+        # traces = [dict(x=list(range(len(the_tiers))), y=tiers[tier], name=tier) for tier in the_tiers]
+
+        # # Create graph layout
+        # layout = dict(
+        #     title='Atlite Tiers',
+        #     xaxis=dict(title='Index'),
+        #     yaxis=dict(title='Scaled Capacity factor (MW/MW)'),
+        #     legend=dict(orientation='h'),
+        # )
+
+    # print("orig_fig: ",orig_fig)
+    # return dict(data=temp_fig["data"], layout=temp_fig["layout"])
+    return temp_fig
 
 
 
@@ -556,47 +603,25 @@ def add_row(n_clicks,table_data):
     return table_data
 
 
+# Callback to update button disabled property
+@app.callback(
+    Output('capacity-factor-button', 'disabled'),
+    Input('table', 'data'),
+)
+def update_button_disabled(data):
+    # Similar logic as the index status callback to determine button state
+    # filtered_data = [row for row in data if all(row.values())]
+    # integer_entries = [(int(row['first_index']), int(row['second_index'])) for row in filtered_data
+    #                    if row['first_index'].isdigit() and row['second_index'].isdigit()]
+    # all_indexes = set(index for entry in integer_entries for index in entry)
+    # missing_indexes = set(range(len(tiers))) - all_indexes
+    # overlapping_indexes = set(index for index in all_indexes if all_indexes.count(index) > 1)
+
+    # return len(missing_indexes) == 0 and len(overlapping_indexes) == 0
+    return True
+
 
 
 if __name__ == '__main__':
     app.run_server(debug=True)
 
-
-
-# app = dash.Dash(__name__)
-#
-#
-# # Define the layout of the Dash app
-# app.layout = html.Div([
-#     # HEADER
-#     html.Div(
-#         [
-#             html.H1("Please select your tiers here (polygons or points)", style={'textAlign': 'center', 'color': 'white', 'background-color': 'lightgreen', 'padding': '20px'}),
-#             html.Ul([
-#                 html.Li("1. First select your tiers within the demarcated area. Note circles are considered points. Use polygon to capture areas."),
-#                 html.Li("2. Second click export on the map"),
-#                 html.Li("3. Third copy the geojson file into the current working directory and run the tier_generation script")
-#             ], style={'list-style-type': 'none', 'margin': '30px','background-color': 'lightblue', 'padding': '30px'}),
-#         ],
-#         style={'margin-top': '20px', 'margin-bottom': '20px'}
-#     ),
-#     # MAP
-#     html.Div(
-#         html.Iframe(id='map', srcDoc=m._repr_html_(), width='70%', height='650', style={'margin': '0 auto'}),
-#         style={'textAlign': 'center'},
-#     ),
-#     # SPACING
-#     html.Div(style={'bottom': 0, 'width': '90%', 'padding': '20px', 'background-color': 'white', 'text-align': 'center'}),
-#     # FOOTER
-#     html.Div(
-#         [
-#             html.Img(src=app.get_asset_url('csir_logo.jpg'), style={'width': '150px', 'height': 'auto', 'margin-right': '20px'}),
-#             html.Img(src=app.get_asset_url('leapre_logo.jpg'), style={'width': '150px', 'height': 'auto', 'margin-left': '20px'}),
-#         ],
-#         style={'bottom': 0, 'width': '95vw', 'padding': '20px', 'background-color': 'lightgray', 'text-align': 'center'}
-#     )
-# ])
-#
-#
-# if __name__ == '__main__':
-#     app.run_server(debug=True)
