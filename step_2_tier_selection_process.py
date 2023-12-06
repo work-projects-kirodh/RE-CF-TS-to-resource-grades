@@ -194,7 +194,7 @@ app.layout = html.Div([
         [
             html.H1("Please select your tiers here (polygons or points)", style={'textAlign': 'center', 'color': 'white', 'background-color': 'lightgreen', 'padding': '20px'}),
             html.Ul([
-                html.Li("1. First select your tiers within the demarcated area. Note circles are considered points. Use polygon to capture areas."),
+                html.Li("1. First select your tiers within the demarcated area. Note circles are considered points. Use polygon/rectangle to capture areas."),
                 html.Li("2. Second click export on the map"),
                 html.Li("3. Third copy the geojson file into the current working directory and run the tier_generation script")
             ], style={'list-style-type': 'none', 'margin': '30px','background-color': 'lightblue', 'padding': '30px'}),
