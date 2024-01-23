@@ -51,5 +51,6 @@ def create_dataset():
         atlite_capacity_factors[os.environ.get('DATA_VARIABLE_NAME')][i, :, :] = capacity_factors
         """ temporary fix """
 
+    # print(atlite_capacity_factors["latitude"],atlite_capacity_factors["longitude"])
 
     return atlite_capacity_factors
