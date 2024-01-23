@@ -2,7 +2,7 @@ Tier selection and preprocessing toolbox for Irena-Flextool
 =============================================================
 
 This tool box consists of four Python scripts:
-- step_1____.py prepares the capacity factor data from atlite. This will output an averaged over time capacity factor in the assets folder. This code will also find the top certain percentage capacity factor and average these to give you capacity factors you can use (option 1). 
+- step_1____.py prepares the capacity factor data from atlite. This will output an averaged over time capacity factor in the assets folder. This code will also find the top certain percentage capacity factor and average these to give you capacity factors you can use (option 1). Option 1A is also bundled in this code and works on bounded tiers. In the .env file there are 5 tiers which the user can choose certain bounds.  
 - step_2____.py provides an interactive map interface on your browser which allows the user to select their tiers. A geojson file needs to be exported. using the export button.
 - step_3____.py uses the atlite capacity factors and the designated points and polygons in the geojson file to extract the tiers of capacity factors. This will produce a csv file (option 2) with all the necessary tiers. The last method uses the tiers and allows the user to select the parts of each tier to create the final capacity factors they so wish (option 3).
 
