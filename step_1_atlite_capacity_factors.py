@@ -16,6 +16,12 @@ import pandas as pd
 load_dotenv()
 
 
+# todo: get top percentage of tiers but using global wind atlas for indexes, but pulling out wp3 data
+# DONE todo: put a code stub for step 4: scaling of capacity factors
+# todo: for option 2, masks from other wp, insert and then make sure geometries are not put over the masks and also
+# todo: make tiers in each geometry that is drawn up to 4 tiers, put parameters for upper percentages for each tier, maybe use the current settings for the tiers
+# todo: make it in command line arguments
+
 def average_capacity_factors_atlite():
     # TODO: read in the capacity factors after running WP3 codes:
     # xr.open_dataset(os.environ.get('ATLITE_CAPACITY_FACTORS_FILE_LOCATION'))
