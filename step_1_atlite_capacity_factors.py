@@ -1,6 +1,6 @@
 """
 Purpose: Returns the averaged capacity factors and saves the netcdf file into the assets folder. Needed for the user
-    comparison between the atlite and world atlas datasets.
+    comparison between the atlite and wind atlas datasets.
 
 Author: Kirodh Boodhraj
 """

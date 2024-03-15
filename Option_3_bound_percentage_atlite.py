@@ -6,90 +6,20 @@ Author: Kirodh Boodhraj
 """
 import numpy as np
 import os
-import xarray as xr
-import temporary_data as temp_data
 from dotenv import load_dotenv
 import copy
 import pandas as pd
 
+import Option_Support_Functions as support_functions
+
+
 # Load variables from the .env file
 load_dotenv()
 
-
-# todo: get top percentage of tiers but using global wind atlas for indexes, but pulling out wp3 data
-# DONE todo: put a code stub for step 4: scaling of capacity factors
-# todo: for option 2, masks from other wp, insert and then make sure geometries are not put over the masks and also
-# todo: make tiers in each geometry that is drawn up to 4 tiers, put parameters for upper percentages for each tier, maybe use the current settings for the tiers
-# todo: make it in command line arguments
-
 def average_capacity_factors_atlite():
-    # TODO: read in the capacity factors after running WP3 codes:
-    # xr.open_dataset(os.environ.get('ATLITE_CAPACITY_FACTORS_FILE_LOCATION'))
-    ## use temp data for now:
-    atlite_capacity_factors = temp_data.create_dataset()
-    print("... Opened atlite capacity factor data.")
-
     # average the capacity factors according to time:
-    atlite_capacity_factors_avg = atlite_capacity_factors[os.environ.get("DATA_VARIABLE_NAME")].mean(dim=os.environ.get("TIME_VARIABLE_NAME"))
+    atlite_capacity_factors, atlite_capacity_factors_avg = support_functions.create_average_capacity_factor_file_atlite()
     print("... Averaged atlite capacity factor data.")
-
-    # save file to assets folder:
-    atlite_capacity_factors_avg.to_netcdf(os.environ.get("AVG_ATLITE_CAPACITY_FACTORS_FILE_LOCATION"))
-    print("... Saved average atlite capacity factor data.")
-
-    # TODO:::: save top % capacity factors and generate a time series from that
-    print("... Generating time series from top "+os.environ.get("PERCENT_UPPER_CAPACITY_FACTORS")+" capacity factors")
-    try:
-        check_percentage = float(os.environ.get("PERCENT_UPPER_CAPACITY_FACTORS"))
-        if check_percentage < 0:
-            ValueError("The percentage is less than 0. Only 0-100 allowed.")
-        if check_percentage > 100:
-            ValueError("The percentage is larger than 100. Only 0-100 allowed.")
-    except Exception as e:
-        ValueError("The percentage is not a number. Only 0-100 allowed.")
-    # Find the top % values from the temporal average
-    top_percentage = copy.deepcopy(atlite_capacity_factors_avg).stack(z=(os.environ.get("AVG_ATLITE_LATITUDE_VARIABLE_NAME"), os.environ.get("AVG_ATLITE_LONGITUDE_VARIABLE_NAME"))).quantile(1.0 - float(os.environ.get("PERCENT_UPPER_CAPACITY_FACTORS"))/100)
-
-
-    # Use boolean indexing to select the desired indexes
-    selected_indexes = atlite_capacity_factors_avg.where(atlite_capacity_factors_avg>top_percentage)#, drop=True)
-
-    # get lats/lons
-    latitudes = selected_indexes[os.environ.get(("AVG_ATLITE_LATITUDE_VARIABLE_NAME"))].values
-    longitudes = selected_indexes[os.environ.get(("AVG_ATLITE_LONGITUDE_VARIABLE_NAME"))].values
-
-    # empty shell to store the lats/lons and the data, then average them later
-    lat_lon_df = pd.DataFrame(columns=['latitude', 'longitude','average_capacity_factor'])
-    tiers_raw_df = pd.DataFrame()
-
-    # loop through and find if nan or data
-    for lat in range(len(latitudes)):
-        for lon in range(len(longitudes)):
-            value = selected_indexes.data[lat][lon]
-            if np.isnan(value):
-                continue
-            else:
-                # add data to the data frame
-                # lat/lon
-                lat_lon_df.loc[len(lat_lon_df)] = [latitudes[lat],longitudes[lon],value]
-                # timeseries
-                # Determine the next number for the new column name
-                next_column_number = len(tiers_raw_df.columns) + 1
-                # Create a new column name
-                new_column_name = f'pre_tier_{next_column_number}'
-                # Add the new column to the DataFrame
-                tiers_raw_df[new_column_name] = atlite_capacity_factors[os.environ.get("DATA_VARIABLE_NAME")].values[:,lat,lon]
-                # print(value)
-
-    # get the final tier and save it
-    tiers_raw_df['average_tier_final'] = tiers_raw_df.mean(axis=1)
-    tiers_raw_df.to_csv(os.environ.get("PERCENT_UPPER_CAPACITY_FACTORS_TIME_SERIES_FILE"))
-    lat_lon_df.to_csv(os.environ.get("PERCENT_UPPER_CAPACITY_FACTORS_LOCATION_FILE"))
-
-    print("... Tier files for top "+os.environ.get("PERCENT_UPPER_CAPACITY_FACTORS")+" capacity factors created:")
-    print("...... Location file located in: "+os.environ.get("PERCENT_UPPER_CAPACITY_FACTORS_LOCATION_FILE"))
-    print("...... Tier file located in: "+os.environ.get("PERCENT_UPPER_CAPACITY_FACTORS_TIME_SERIES_FILE"))
-    print("... Note that averaged tier is in average_tier_final column.")
 
 
     # Option 1A: Split tiers according to percentage bounds:
@@ -106,7 +36,6 @@ def average_capacity_factors_atlite():
                 if np.isnan(value):
                     continue
                 else:
-                    # print("Found values!",cumulative_average_values)
                     # Add the new column to the skeleton column
                     cumulative_average_values += atlite_data[os.environ.get("DATA_VARIABLE_NAME")].values[:, lat, lon]
                     number_columns_in_tier += 1
@@ -122,7 +51,7 @@ def average_capacity_factors_atlite():
     percent_upper_tier4_capacity_factors = list(map(float, os.environ.get("PERCENT_UPPER_TIER4_CAPACITY_FACTORS").split(',')))
     percent_upper_tier5_capacity_factors = list(map(float, os.environ.get("PERCENT_UPPER_TIER5_CAPACITY_FACTORS").split(',')))
 
-    # Find the top % values from the temporal average
+    # Find the top % values from the temporal average (sorts out user swapping max and min)
     upper_percentile_tier1 = 1.0 - min(percent_upper_tier1_capacity_factors) / 100.0
     upper_percentile_tier2 = 1.0 - min(percent_upper_tier2_capacity_factors) / 100.0
     upper_percentile_tier3 = 1.0 - min(percent_upper_tier3_capacity_factors) / 100.0
@@ -164,11 +93,11 @@ def average_capacity_factors_atlite():
     selected_indexes_tier5 = atlite_capacity_factors_avg.where((atlite_capacity_factors_avg>bottom_bound_tier5) & (atlite_capacity_factors_avg<top_bound_tier5))#, drop=True)
 
     # Generate the tiers for option 1A:
-    bound_tier1 = get_tier_percentage_bound(atlite_capacity_factors["latitude"].values,atlite_capacity_factors["longitude"].values,copy.deepcopy(atlite_capacity_factors),selected_indexes_tier1)
-    bound_tier2 = get_tier_percentage_bound(atlite_capacity_factors["latitude"].values,atlite_capacity_factors["longitude"].values,copy.deepcopy(atlite_capacity_factors),selected_indexes_tier2)
-    bound_tier3 = get_tier_percentage_bound(atlite_capacity_factors["latitude"].values,atlite_capacity_factors["longitude"].values,copy.deepcopy(atlite_capacity_factors),selected_indexes_tier3)
-    bound_tier4 = get_tier_percentage_bound(atlite_capacity_factors["latitude"].values,atlite_capacity_factors["longitude"].values,copy.deepcopy(atlite_capacity_factors),selected_indexes_tier4)
-    bound_tier5 = get_tier_percentage_bound(atlite_capacity_factors["latitude"].values,atlite_capacity_factors["longitude"].values,copy.deepcopy(atlite_capacity_factors),selected_indexes_tier5)
+    bound_tier1 = get_tier_percentage_bound(atlite_capacity_factors[os.environ.get("AVG_ATLITE_LATITUDE_VARIABLE_NAME")].values,atlite_capacity_factors[os.environ.get("AVG_ATLITE_LONGITUDE_VARIABLE_NAME")].values,copy.deepcopy(atlite_capacity_factors),selected_indexes_tier1)
+    bound_tier2 = get_tier_percentage_bound(atlite_capacity_factors[os.environ.get("AVG_ATLITE_LATITUDE_VARIABLE_NAME")].values,atlite_capacity_factors[os.environ.get("AVG_ATLITE_LONGITUDE_VARIABLE_NAME")].values,copy.deepcopy(atlite_capacity_factors),selected_indexes_tier2)
+    bound_tier3 = get_tier_percentage_bound(atlite_capacity_factors[os.environ.get("AVG_ATLITE_LATITUDE_VARIABLE_NAME")].values,atlite_capacity_factors[os.environ.get("AVG_ATLITE_LONGITUDE_VARIABLE_NAME")].values,copy.deepcopy(atlite_capacity_factors),selected_indexes_tier3)
+    bound_tier4 = get_tier_percentage_bound(atlite_capacity_factors[os.environ.get("AVG_ATLITE_LATITUDE_VARIABLE_NAME")].values,atlite_capacity_factors[os.environ.get("AVG_ATLITE_LONGITUDE_VARIABLE_NAME")].values,copy.deepcopy(atlite_capacity_factors),selected_indexes_tier4)
+    bound_tier5 = get_tier_percentage_bound(atlite_capacity_factors[os.environ.get("AVG_ATLITE_LATITUDE_VARIABLE_NAME")].values,atlite_capacity_factors[os.environ.get("AVG_ATLITE_LONGITUDE_VARIABLE_NAME")].values,copy.deepcopy(atlite_capacity_factors),selected_indexes_tier5)
     print(bound_tier1)
     print(bound_tier2)
     print(bound_tier3)
@@ -184,10 +113,15 @@ def average_capacity_factors_atlite():
         'tier_5': bound_tier5
     })
 
-    tier_dataframe_option1A.to_csv(os.environ.get("BOUND_CAPACITY_FACTORS_TIME_SERIES_FILE"),index=False)
+    # check if output directories are created
+    if not os.path.exists(os.environ.get('OPTION_3_OUTPUT_FOLDER')):
+        os.makedirs(os.environ.get('OPTION_3_OUTPUT_FOLDER'))
 
 
-    print("Please run step_2____.py!")
+    tier_dataframe_option1A.to_csv(os.path.join(os.environ.get('OPTION_3_OUTPUT_FOLDER'),os.environ.get("BOUND_CAPACITY_FACTORS_TIME_SERIES_FILE")),index=False)
+
+
+    print("Option_3 completed successfully!")
 
 if __name__ == '__main__':
 

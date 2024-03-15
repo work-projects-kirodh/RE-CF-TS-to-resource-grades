@@ -45,8 +45,8 @@ draw.add_to(m)
 
 # Create FeatureGroups for each layer
 user_bound_layer_polygon = folium.FeatureGroup(name='User Bounding Box')
-world_atlas_layer_png = folium.FeatureGroup(name='World Atlas Capacity Factors PNG')
-world_atlas_layer_heatmap = folium.FeatureGroup(name='World Atlas Capacity Factors Heatmap')
+wind_atlas_layer_png = folium.FeatureGroup(name='World Atlas Capacity Factors PNG')
+wind_atlas_layer_heatmap = folium.FeatureGroup(name='World Atlas Capacity Factors Heatmap')
 atlite_layer_heatmap = folium.FeatureGroup(name='Atlite Capacity Factors Heatmap')
 
 
@@ -95,50 +95,50 @@ user_bound_frame.add_to(user_bound_layer_polygon)
 ########################################################################
 ## World Atlas PNG layer
 ########################################################################
-# add the world atlas capacity factor to the map
-world_atlas_capacity_factor_file = os.environ.get("WORLD_ATLAS_CAPACITY_FACTORS_PNG_FILE_LOCATION")
+# add the wind atlas capacity factor to the map
+wind_atlas_capacity_factor_file = os.environ.get("WIND_ATLAS_CAPACITY_FACTORS_PNG_FILE_LOCATION")
 
-# world_file_params = [2381.93855019098555204, 0, 0, -2381.93855019098555204, 1079888.20687509560957551, -2294353.40437131375074387]
+# wind_file_params = [2381.93855019098555204, 0, 0, -2381.93855019098555204, 1079888.20687509560957551, -2294353.40437131375074387]
 # Specify the geographical bounds of the PNG file
 # left, bottom, right, top = 9.6,-35.8,37.8,-20.0
-png_left, png_bottom, png_right, png_top = float(os.environ.get("WORLD_ATLAS_PNG_LONGITUDE_LEFT")),\
-                           float(os.environ.get("WORLD_ATLAS_PNG_LATITUDE_BOTTOM")),\
-                           float(os.environ.get("WORLD_ATLAS_PNG_LONGITUDE_RIGHT")),\
-                           float(os.environ.get("WORLD_ATLAS_PNG_LATITUDE_TOP"))
+png_left, png_bottom, png_right, png_top = float(os.environ.get("WIND_ATLAS_PNG_LONGITUDE_LEFT")),\
+                           float(os.environ.get("WIND_ATLAS_PNG_LATITUDE_BOTTOM")),\
+                           float(os.environ.get("WIND_ATLAS_PNG_LONGITUDE_RIGHT")),\
+                           float(os.environ.get("WIND_ATLAS_PNG_LATITUDE_TOP"))
 
 # build layer
-world_atlas_png_overlay = folium.raster_layers.ImageOverlay(
-    image=world_atlas_capacity_factor_file,
+wind_atlas_png_overlay = folium.raster_layers.ImageOverlay(
+    image=wind_atlas_capacity_factor_file,
     bounds = [[png_bottom, png_left], [png_top, png_right]],
     opacity=0.3,
     interactive=True,
     # mercator_project=True,  #errors if uncomment! Specify that the projection is mercator
-    # world_file_params=world_file_params,
+    # wind_file_params=wind_file_params,
 )
 # image_overlay.add_to(m)
-world_atlas_png_overlay.add_to(world_atlas_layer_png)
+wind_atlas_png_overlay.add_to(wind_atlas_layer_png)
 
 ########################################################################
 ## World Atlas heatmap layer
 ########################################################################
-# get down scaling resolution of world atlas netcdf i.e. number of points to skip for lat lon values in array, to make things render faster
-world_atlas_resolution_reduction = int(os.environ.get("WORLD_ATLAS_RESOLUTION_REDUCTION"))
-# open world atlas netcdf
-world_atlas_netcdf = xr.open_dataset(os.environ.get("WORLD_ATLAS_CAPACITY_FACTORS_HEATMAP_FILE_LOCATION"))
+# get down scaling resolution of wind atlas netcdf i.e. number of points to skip for lat lon values in array, to make things render faster
+wind_atlas_resolution_reduction = int(os.environ.get("WIND_ATLAS_RESOLUTION_REDUCTION"))
+# open wind atlas netcdf
+wind_atlas_netcdf = xr.open_dataset(os.environ.get("WIND_ATLAS_CAPACITY_FACTORS_HEATMAP_FILE_LOCATION"))
 
-# Select every world_atlas_resolution_reduction latitude and longitude along with capacity_factor
-capacity_factor_subset = world_atlas_netcdf.sel(lat=world_atlas_netcdf.lat.values[::world_atlas_resolution_reduction], lon=world_atlas_netcdf.lon.values[::world_atlas_resolution_reduction])
+# Select every wind_atlas_resolution_reduction latitude and longitude along with capacity_factor
+capacity_factor_subset = wind_atlas_netcdf.sel(lat=wind_atlas_netcdf.lat.values[::wind_atlas_resolution_reduction], lon=wind_atlas_netcdf.lon.values[::wind_atlas_resolution_reduction])
 
 # Access the capacity_factor variable from the subset
-latitude_wa = capacity_factor_subset[os.environ.get("WORLD_ATLAS_HEATMAP_LATITUDE_VARIABLE_NAME")].values.astype(float)
-longitude_wa = capacity_factor_subset[os.environ.get("WORLD_ATLAS_HEATMAP_LONGITUDE_VARIABLE_NAME")].values.astype(float)
-values_wa = capacity_factor_subset[os.environ.get("WORLD_ATLAS_HEATMAP_DATA_VARIABLE_NAME")].values.astype(float)
+latitude_wa = capacity_factor_subset[os.environ.get("WIND_ATLAS_HEATMAP_LATITUDE_VARIABLE_NAME")].values.astype(float)
+longitude_wa = capacity_factor_subset[os.environ.get("WIND_ATLAS_HEATMAP_LONGITUDE_VARIABLE_NAME")].values.astype(float)
+values_wa = capacity_factor_subset[os.environ.get("WIND_ATLAS_HEATMAP_DATA_VARIABLE_NAME")].values.astype(float)
 values_wa[np.isnan(values_wa)] = 0.0  # Replace NaN with 0.0, you can choose a different value if needed
 lon_wa, lat_wa = np.meshgrid(longitude_wa, latitude_wa)
 # serialize data for folium
 data_wa = list(zip(lat_wa.flatten(), lon_wa.flatten(), values_wa.flatten()))
 # add to map layer
-plugins.HeatMap(data_wa, name='atlas',opacity=0.3).add_to(world_atlas_layer_heatmap)
+plugins.HeatMap(data_wa, name='atlas',opacity=0.3).add_to(wind_atlas_layer_heatmap)
 
 
 
@@ -174,8 +174,8 @@ m.get_root().html.add_child(folium.Element(legend_html))
 
 
 # Add FeatureGroups to the map, order matters!
-world_atlas_layer_png.add_to(m)
-world_atlas_layer_heatmap.add_to(m)
+wind_atlas_layer_png.add_to(m)
+wind_atlas_layer_heatmap.add_to(m)
 atlite_layer_heatmap.add_to(m)
 user_bound_layer_polygon.add_to(m)
 
