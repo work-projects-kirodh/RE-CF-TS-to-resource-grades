@@ -21,9 +21,9 @@ def average_capacity_factors_atlite():
     print("... Read averaged atlite capacity factor data.")
 
     # Save top % capacity factors and generate a time series from that
-    print("... Generating time series from top "+os.environ.get("PERCENT_UPPER_CAPACITY_FACTORS")+" capacity factors")
+    print("... Generating time series from top "+os.environ.get("PERCENT_UPPER_CAPACITY_FACTORS_1")+" capacity factors")
     try:
-        check_percentage = float(os.environ.get("PERCENT_UPPER_CAPACITY_FACTORS"))
+        check_percentage = float(os.environ.get("PERCENT_UPPER_CAPACITY_FACTORS_1"))
         if check_percentage < 0:
             ValueError("The percentage is less than 0. Only 0-100 allowed.")
         if check_percentage > 100:
@@ -31,7 +31,7 @@ def average_capacity_factors_atlite():
     except Exception as e:
         ValueError("The percentage is not a number. Only 0-100 allowed.")
     # Find the top % values from the temporal average
-    top_percentage = copy.deepcopy(atlite_capacity_factors_avg).stack(z=(os.environ.get("AVG_ATLITE_LATITUDE_VARIABLE_NAME"), os.environ.get("AVG_ATLITE_LONGITUDE_VARIABLE_NAME"))).quantile(1.0 - float(os.environ.get("PERCENT_UPPER_CAPACITY_FACTORS"))/100)
+    top_percentage = copy.deepcopy(atlite_capacity_factors_avg).stack(z=(os.environ.get("AVG_ATLITE_LATITUDE_VARIABLE_NAME"), os.environ.get("AVG_ATLITE_LONGITUDE_VARIABLE_NAME"))).quantile(1.0 - float(os.environ.get("PERCENT_UPPER_CAPACITY_FACTORS_1"))/100)
 
 
     # Use boolean indexing to select the desired indexes
@@ -71,12 +71,12 @@ def average_capacity_factors_atlite():
     if not os.path.exists(os.environ.get('OPTION_1_OUTPUT_FOLDER')):
         os.makedirs(os.environ.get('OPTION_1_OUTPUT_FOLDER'))
 
-    tiers_raw_df.to_csv(os.path.join(os.environ.get('OPTION_1_OUTPUT_FOLDER'),os.environ.get("PERCENT_UPPER_CAPACITY_FACTORS_TIME_SERIES_FILE")))
-    lat_lon_df.to_csv(os.path.join(os.environ.get('OPTION_1_OUTPUT_FOLDER'),os.environ.get("PERCENT_UPPER_CAPACITY_FACTORS_LOCATION_FILE")))
+    tiers_raw_df.to_csv(os.path.join(os.environ.get('OPTION_1_OUTPUT_FOLDER'),os.environ.get("PERCENT_UPPER_CAPACITY_FACTORS_TIME_SERIES_FILE_1")))
+    lat_lon_df.to_csv(os.path.join(os.environ.get('OPTION_1_OUTPUT_FOLDER'),os.environ.get("PERCENT_UPPER_CAPACITY_FACTORS_LOCATION_FILE_1")))
 
-    print("... Tier files for top "+os.environ.get("PERCENT_UPPER_CAPACITY_FACTORS")+" capacity factors created:")
-    print("...... Location file located in: "+os.environ.get("PERCENT_UPPER_CAPACITY_FACTORS_LOCATION_FILE"))
-    print("...... Tier file located in: "+os.environ.get("PERCENT_UPPER_CAPACITY_FACTORS_TIME_SERIES_FILE"))
+    print("... Tier files for top "+os.environ.get("PERCENT_UPPER_CAPACITY_FACTORS_1")+" capacity factors created:")
+    print("...... Location file located in: "+os.environ.get("PERCENT_UPPER_CAPACITY_FACTORS_LOCATION_FILE_1"))
+    print("...... Tier file located in: "+os.environ.get("PERCENT_UPPER_CAPACITY_FACTORS_TIME_SERIES_FILE_1"))
     print("... Note that averaged tier is in average_tier_final column.")
 
     print("Option_1 completed successfully!")

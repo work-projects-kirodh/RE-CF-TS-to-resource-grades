@@ -118,7 +118,7 @@ def average_capacity_factors_atlite():
         os.makedirs(os.environ.get('OPTION_3_OUTPUT_FOLDER'))
 
 
-    tier_dataframe_option1A.to_csv(os.path.join(os.environ.get('OPTION_3_OUTPUT_FOLDER'),os.environ.get("BOUND_CAPACITY_FACTORS_TIME_SERIES_FILE")),index=False)
+    tier_dataframe_option1A.to_csv(os.path.join(os.environ.get('OPTION_3_OUTPUT_FOLDER'),os.environ.get("BOUND_CAPACITY_FACTORS_TIME_SERIES_FILE_3")),index=False)
 
 
     print("Option_3 completed successfully!")

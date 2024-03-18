@@ -44,10 +44,10 @@ def read_wind_atlas_data_full():
     # Access the capacity_factor variable from the subset
     latitude_wa = wind_atlas_netcdf[os.environ.get("WIND_ATLAS_HEATMAP_LATITUDE_VARIABLE_NAME")].values.astype(float)
     longitude_wa = wind_atlas_netcdf[os.environ.get("WIND_ATLAS_HEATMAP_LONGITUDE_VARIABLE_NAME")].values.astype(float)
-    values_wa = wind_atlas_netcdf[os.environ.get("WIND_ATLAS_HEATMAP_DATA_VARIABLE_NAME")].values.astype(float)
-    # values_wa[np.isnan(values_wa)] = 0.0  # Replace NaN with 0.0, you can choose a different value if needed
+    all_data_wa = wind_atlas_netcdf[os.environ.get("WIND_ATLAS_HEATMAP_DATA_VARIABLE_NAME")] #.values.astype(float)
+    # all_data_wa[np.isnan(all_data_wa)] = 0.0  # Replace NaN with 0.0, you can choose a different value if needed
     # lon_wa, lat_wa = np.meshgrid(longitude_wa, latitude_wa)
-    return latitude_wa,longitude_wa,values_wa
+    return latitude_wa,longitude_wa,all_data_wa
 
 
 def read_wind_atlas_data_reduced():
@@ -64,7 +64,7 @@ def read_wind_atlas_data_reduced():
     # Access the capacity_factor variable from the subset
     latitude_wa = capacity_factor_subset[os.environ.get("WIND_ATLAS_HEATMAP_LATITUDE_VARIABLE_NAME")].values.astype(float)
     longitude_wa = capacity_factor_subset[os.environ.get("WIND_ATLAS_HEATMAP_LONGITUDE_VARIABLE_NAME")].values.astype(float)
-    values_wa = capacity_factor_subset[os.environ.get("WIND_ATLAS_HEATMAP_DATA_VARIABLE_NAME")].values.astype(float)
+    values_wa = capacity_factor_subset[os.environ.get("WIND_ATLAS_HEATMAP_DATA_VARIABLE_NAME")] #.values.astype(float)
     # values_wa[np.isnan(values_wa)] = 0.0  # Replace NaN with 0.0, you can choose a different value if needed
     # lon_wa, lat_wa = np.meshgrid(longitude_wa, latitude_wa)
 
