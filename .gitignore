@@ -9,6 +9,11 @@ capacity_factors_atlite
 assets/*.nc
 
 assets/option_1_output/
+assets/option_2_output/
 assets/option_3_output/
+assets/option_4_output/
+assets/option_5_output/
+assets/option_6_output/
+assets/option_7_output/
 
 __pycache__

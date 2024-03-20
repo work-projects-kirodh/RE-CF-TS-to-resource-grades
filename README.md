@@ -7,7 +7,7 @@ Tier generation options available:
 
 There are different tier options available:
 - Option 1 (dev complete): The user defines an upper percentage limit on the data e.g. I want the upper 10%. Using the averaged Atlite data, this option will find the top certain percentage capacity factors. The corresponding Atlite capacity factor timeseries data is saved as a separate tier. The last tier generated is the average of all the Atlite timeseries found in the upper user defined percentage.
-- Option 2: This is the same as Option 1, except that the Wind Atlas data is used to find the location of the upper percentage tiers. Based on these locations, the closest locations in the Atlite data are then used for generating the tiers. 
+- Option 2:(dev complete): This is the same as Option 1, except that the Wind Atlas data is used to find the location of the upper percentage tiers. Based on these locations, the closest locations in the Atlite data are then used for generating the tiers. 
 - Option 3 (dev complete): There are 5 user defined tier bounds. Using the averaged Atlite data, this option will find the bounded percentage band capacity factors for each of those tiers. The timeseries Atlite capacity factor data for each tier bound is averaged in order to generate one timeseries per tier.
 - Option 4: This is the same as Option 3, except that the tier bounds are generated from the Wind Atlas data. The locations are then closely matched to the Atlite data and the timeseries are then found. These are averaged to generate one timeseries per tier.
 - Option 5: (Two scripts need to be run, geometry creation and tier generation). The user draws their own geometries to indicate tier boundaries. In each of these geometries the Atlite timeseries data is extracted and averaged. Thus giving one timeseries and tier per geometry.
@@ -44,12 +44,16 @@ Parameters and variables can be set in the .env file. Or via the command line in
 - Option 7: var6 etc.
 
 
+Viewing all tiers
+-------------------
 
+You can run the view_all_tiers.py script to show all the tiers of all the Options that were generated. These tiers are shown ona web browser interactive graph page.
 
 
 Notes:
 -------
 
+- Option 1, 2,3 and 4 (and 7) dont require user input on a browser. Options 5 and 6 require the user input on a browser.
 - All relevant Python packages are found in requirements.txt (I may be missing some :-)) 
 - Make sure to copy the sample.env to an .env file. This .env file, which contains all the user settings, is the user settings. Rather not change the assets folder. Keep that as is. The file names you can change as you need. Edit this file to configure the preprocessing scripts.
 - Too high a resolution is not a good idea for the world atlas netcdf data, this will significantly increase the rendering time.

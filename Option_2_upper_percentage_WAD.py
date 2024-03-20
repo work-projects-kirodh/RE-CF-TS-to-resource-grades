@@ -1,5 +1,5 @@
 """
-Purpose: Returns the upper percentage averaged capacity factors for the WIND ATLAS data.
+Purpose: Finds the upper percentage capacity factors for the WIND ATLAS data. Then pulls the closest location timeseries data from the Atlite data and averages then to form a tier.
 
 Author: Kirodh Boodhraj
 """
