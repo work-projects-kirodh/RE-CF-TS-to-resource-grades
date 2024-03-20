@@ -6,7 +6,6 @@ import folium
 from folium import plugins
 import numpy as np
 import xarray as xr
-import pandas as pd
 from dotenv import load_dotenv
 
 
@@ -53,7 +52,7 @@ atlite_layer_heatmap = folium.FeatureGroup(name='Atlite Capacity Factors Heatmap
 ########################################################################
 ## Atlite heatmap layer
 ########################################################################
-# file already open fom at top of code used for bounding box
+# file already open from at top of code used for bounding box
 # Extract the data
 latitude_a = atlite_avg_capacity_factor_data[os.environ.get("AVG_ATLITE_LATITUDE_VARIABLE_NAME")].values.astype(float)
 longitude_a = atlite_avg_capacity_factor_data[os.environ.get("AVG_ATLITE_LONGITUDE_VARIABLE_NAME")].values.astype(float)
@@ -96,7 +95,7 @@ user_bound_frame.add_to(user_bound_layer_polygon)
 ## World Atlas PNG layer
 ########################################################################
 # add the world atlas capacity factor to the map
-world_atlas_capacity_factor_file = os.environ.get("WORLD_ATLAS_CAPACITY_FACTORS_PNG_FILE_LOCATION")
+world_atlas_capacity_factor_file = os.environ.get("WIND_ATLAS_CAPACITY_FACTORS_PNG_FILE_LOCATION")
 
 # world_file_params = [2381.93855019098555204, 0, 0, -2381.93855019098555204, 1079888.20687509560957551, -2294353.40437131375074387]
 # Specify the geographical bounds of the PNG file
@@ -122,17 +121,17 @@ world_atlas_png_overlay.add_to(world_atlas_layer_png)
 ## World Atlas heatmap layer
 ########################################################################
 # get down scaling resolution of world atlas netcdf i.e. number of points to skip for lat lon values in array, to make things render faster
-world_atlas_resolution_reduction = int(os.environ.get("WORLD_ATLAS_RESOLUTION_REDUCTION"))
+world_atlas_resolution_reduction = int(os.environ.get("WIND_ATLAS_RESOLUTION_REDUCTION"))
 # open world atlas netcdf
 world_atlas_netcdf = xr.open_dataset(os.environ.get("WORLD_ATLAS_CAPACITY_FACTORS_HEATMAP_FILE_LOCATION"))
 
-# Select every world_atlas_resolution_reduction latitude and longitude along with capacity_factor
+# Select every wind_atlas_resolution_reduction latitude and longitude along with capacity_factor
 capacity_factor_subset = world_atlas_netcdf.sel(lat=world_atlas_netcdf.lat.values[::world_atlas_resolution_reduction], lon=world_atlas_netcdf.lon.values[::world_atlas_resolution_reduction])
 
 # Access the capacity_factor variable from the subset
-latitude_wa = capacity_factor_subset[os.environ.get("WORLD_ATLAS_HEATMAP_LATITUDE_VARIABLE_NAME")].values.astype(float)
-longitude_wa = capacity_factor_subset[os.environ.get("WORLD_ATLAS_HEATMAP_LONGITUDE_VARIABLE_NAME")].values.astype(float)
-values_wa = capacity_factor_subset[os.environ.get("WORLD_ATLAS_HEATMAP_DATA_VARIABLE_NAME")].values.astype(float)
+latitude_wa = capacity_factor_subset[os.environ.get("WIND_ATLAS_HEATMAP_LATITUDE_VARIABLE_NAME")].values.astype(float)
+longitude_wa = capacity_factor_subset[os.environ.get("WIND_ATLAS_HEATMAP_LONGITUDE_VARIABLE_NAME")].values.astype(float)
+values_wa = capacity_factor_subset[os.environ.get("WIND_ATLAS_HEATMAP_DATA_VARIABLE_NAME")].values.astype(float)
 values_wa[np.isnan(values_wa)] = 0.0  # Replace NaN with 0.0, you can choose a different value if needed
 lon_wa, lat_wa = np.meshgrid(longitude_wa, latitude_wa)
 # serialize data for folium
@@ -211,8 +210,8 @@ app.layout = html.Div([
     # FOOTER
     html.Div(
         [
-            html.Img(src=app.get_asset_url('csir_logo.jpg'), style={'width': '150px', 'height': 'auto', 'margin-right': '20px'}),
-            html.Img(src=app.get_asset_url('leapre_logo.jpg'), style={'width': '150px', 'height': 'auto', 'margin-left': '20px'}),
+            html.Img(src=app.get_asset_url('static/csir_logo.jpg'), style={'width': '150px', 'height': 'auto', 'margin-right': '20px'}),
+            html.Img(src=app.get_asset_url('static/leapre_logo.jpg'), style={'width': '150px', 'height': 'auto', 'margin-left': '20px'}),
         ],
         style={'bottom': 0, 'width': '95vw', 'padding': '20px', 'background-color': 'lightgray', 'text-align': 'center'}
     )
