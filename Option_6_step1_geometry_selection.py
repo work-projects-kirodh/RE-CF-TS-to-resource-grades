@@ -202,7 +202,7 @@ app.layout = html.Div([
     # HEADER
     html.Div(
         [
-            html.H1("Multiple tier per geometry option", style={'textAlign': 'center', 'color': 'white', 'background-color': 'lightgreen', 'padding': '20px'}),
+            html.H1("Multiple tier per geometry option 6 (Step 1 of 2)", style={'textAlign': 'center', 'color': 'white', 'background-color': 'lightgreen', 'padding': '20px'}),
             html.Ul([
                 html.Li("1. Please select your geometries within the demarcated area. You may use polygons, points, rectangles or circles. Note circles are considered points. For point geometries, only one tier is returned."),
                 html.Li("2. Ensure your geometries are within the bounding box of the Atlite data. Any geometry outside this box will be discarded."),
