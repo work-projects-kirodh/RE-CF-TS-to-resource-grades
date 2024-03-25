@@ -11,7 +11,7 @@ There are different tier options available:
 - Option 3 (dev complete): There are 5 user defined tier bounds. Using the averaged Atlite data, this option will find the bounded percentage band capacity factors for each of those tiers. The timeseries Atlite capacity factor data for each tier bound is averaged in order to generate one timeseries per tier.
 - Option 4: This is the same as Option 3, except that the tier bounds are generated from the Wind Atlas data. The locations are then closely matched to the Atlite data and the timeseries are then found. These are averaged to generate one timeseries per tier.
 - Option 5: (Two scripts need to be run, geometry creation and tier generation). The user draws their own geometries to indicate tier boundaries. In each of these geometries the Atlite timeseries data is extracted and averaged. Thus giving one timeseries and tier per geometry.
-- Option 6: (Two scripts need to be run, geometry creation and tier generation). This is the same as Option 5, except that for each geometry there are multiple tiers. These tiers are based on the tier bounds provided by the user.
+- Option 6: (Two scripts need to be run, geometry creation and tier generation). This is the same as Option 5, except that for each geometry there are multiple tiers. These tiers are based on the tier bounds provided by the user. Note that for point geometries, only one tier is returned.
 - Option 7: (User creates function). This function takes tiers and then calculates the new scaled tiers using the Wind Atlas data. The user must provide the function for this.
 
 
@@ -57,6 +57,9 @@ Notes:
 - All relevant Python packages are found in requirements.txt (I may be missing some :-)) 
 - Make sure to copy the sample.env to an .env file. This .env file, which contains all the user settings, is the user settings. Rather not change the assets folder. Keep that as is. The file names you can change as you need. Edit this file to configure the preprocessing scripts.
 - Too high a resolution is not a good idea for the world atlas netcdf data, this will significantly increase the rendering time.
+- Only single band (not classified) .tif files used as masks, make sure they each have an extent. You can add as many as you want in the masks folder. A method is described in this readme on how to convert a classified raster to a single band raster.
+- Please give step 1 for Option 5 and 6 some time before loading the map on the browser, it can takea while to read in the mask files
+
 
 
 World Atlas Data preprep
@@ -67,6 +70,25 @@ World Atlas Data preprep
 - User can then select the tiers according to the world atlas capacity factors if they so wish.
 - To obtain the netcdf file, use qgis to save the tiff as a netcdf file.
 
+
+Masks preparation
+------------------
+
+As noted, only single band (not classified) .tif files used as masks, make sure they each have an extent. You can add as many as you want in the masks folder. A method is described in this readme on how to convert a classified raster to a single band raster.
+
+If you have a classified tiff file and want to convert it to a single band then you can use QGIS.
+
+![Classified vs Single Band tiff file](assets/static/classified_and_single_band_raster.PNG)
+
+
+- Open QGIS and load the classified tiff layer
+- Open the raster calculater (raster --> raster calculator) and perform the calculation "classified_raster_band@1" * 1.
+- Save it into a new tiff file
+- Use this new singleband tiff file as your mask in the assets/masks folder
+
+![How to convert from Classified to Single Band tiff file](assets/static/convert_classified_to_single_band_raster.PNG)
+
+Please remove all classified masks (or rename the extension) from the assets/masks folder so that it doesnt load them, this is to save you some run time.
 
 Assumptions
 -------------------

@@ -6,8 +6,9 @@ import folium
 from folium import plugins
 import numpy as np
 import xarray as xr
-import pandas as pd
 from dotenv import load_dotenv
+
+import Option_Support_Functions as support_functions
 
 
 # Load variables from the .env file
@@ -26,11 +27,9 @@ app = dash.Dash(__name__)
 ## open atlite capacity factor data
 ########################################################################
 # open the averaged atlite capacity factor data
-# Get the environment variable
-atlite_filepath_env = os.environ.get("AVG_ATLITE_CAPACITY_FACTORS_FILE_LOCATION")
+atlite_capacity_factors, atlite_capacity_factors_avg = support_functions.create_average_capacity_factor_file_atlite()
+print("... Read averaged atlite capacity factor data.")
 
-atlite_avg_capacity_factor_data = xr.open_dataset(atlite_filepath_env)
-# print(atlite_avg_capacity_factor_data)
 
 
 ########################################################################
@@ -45,25 +44,26 @@ draw.add_to(m)
 
 # Create FeatureGroups for each layer
 user_bound_layer_polygon = folium.FeatureGroup(name='User Bounding Box')
-world_atlas_layer_png = folium.FeatureGroup(name='World Atlas Capacity Factors PNG')
-world_atlas_layer_heatmap = folium.FeatureGroup(name='World Atlas Capacity Factors Heatmap')
+wind_atlas_layer_png = folium.FeatureGroup(name='Wind Atlas Capacity Factors PNG')
+wind_atlas_layer_heatmap = folium.FeatureGroup(name='Wind Atlas Capacity Factors Heatmap')
 atlite_layer_heatmap = folium.FeatureGroup(name='Atlite Capacity Factors Heatmap')
 
 
 ########################################################################
 ## Atlite heatmap layer
 ########################################################################
-# file already open fom at top of code used for bounding box
+# file already open from at top of code used for bounding box
 # Extract the data
-latitude_a = atlite_avg_capacity_factor_data[os.environ.get("AVG_ATLITE_LATITUDE_VARIABLE_NAME")].values.astype(float)
-longitude_a = atlite_avg_capacity_factor_data[os.environ.get("AVG_ATLITE_LONGITUDE_VARIABLE_NAME")].values.astype(float)
-values_a = atlite_avg_capacity_factor_data[os.environ.get("AVG_ATLITE_DATA_VARIABLE_NAME")].values.astype(float)
+latitude_a = atlite_capacity_factors_avg[os.environ.get("AVG_ATLITE_LATITUDE_VARIABLE_NAME")].values.astype(float)
+longitude_a = atlite_capacity_factors_avg[os.environ.get("AVG_ATLITE_LONGITUDE_VARIABLE_NAME")].values.astype(float)
+# values_a = atlite_capacity_factors_avg[os.environ.get("AVG_ATLITE_DATA_VARIABLE_NAME")].values.astype(float)
+values_a = atlite_capacity_factors_avg.values.astype(float)
 values_a[np.isnan(values_a)] = 0.0  # Replace NaN with 0.0, you can choose a different value if needed
 
 # Create a meshgrid of longitude and latitude
 lon_a, lat_a = np.meshgrid(longitude_a, latitude_a)
 
-# Generate random altitude values for demonstration purposes
+# Generate  altitude values for demonstration purposes
 data_a = list(zip(lat_a.flatten(), lon_a.flatten(), values_a.flatten()))
 
 # add to map layer
@@ -75,10 +75,10 @@ plugins.HeatMap(data_a, name='atlite',opacity=0.3).add_to(atlite_layer_heatmap)
 ########################################################################
 # add the bounding box user should stay within
 # Get the maximum and minimum latitude and longitude values
-max_latitude = atlite_avg_capacity_factor_data.latitude.max().values
-min_latitude = atlite_avg_capacity_factor_data.latitude.min().values
-max_longitude = atlite_avg_capacity_factor_data.longitude.max().values
-min_longitude = atlite_avg_capacity_factor_data.longitude.min().values
+max_latitude = atlite_capacity_factors_avg.latitude.max().values
+min_latitude = atlite_capacity_factors_avg.latitude.min().values
+max_longitude = atlite_capacity_factors_avg.longitude.max().values
+min_longitude = atlite_capacity_factors_avg.longitude.min().values
 
 # rectangle polygon
 user_bound_frame = folium.Rectangle(
@@ -87,58 +87,66 @@ user_bound_frame = folium.Rectangle(
     fill=False,
     weight=5,
     opacity=1.0,
-    popup=folium.Popup('Put your points and polygons within this bounding box!', parse_html=True),  # Add a message to the rectangle
+    popup=folium.Popup('Put your points and polygons within this bounding box! Avoid masked values!', parse_html=True),  # Add a message to the rectangle
 )
 # south_africa_frame.add_to(m)
 user_bound_frame.add_to(user_bound_layer_polygon)
 
 ########################################################################
-## World Atlas PNG layer
+## Wind Atlas PNG layer
 ########################################################################
-# add the world atlas capacity factor to the map
-world_atlas_capacity_factor_file = os.environ.get("WORLD_ATLAS_CAPACITY_FACTORS_PNG_FILE_LOCATION")
+# add the wind atlas capacity factor to the map
+wind_atlas_capacity_factor_file = os.environ.get("WIND_ATLAS_CAPACITY_FACTORS_PNG_FILE_LOCATION")
 
-# world_file_params = [2381.93855019098555204, 0, 0, -2381.93855019098555204, 1079888.20687509560957551, -2294353.40437131375074387]
+# wind_file_params = [2381.93855019098555204, 0, 0, -2381.93855019098555204, 1079888.20687509560957551, -2294353.40437131375074387]
 # Specify the geographical bounds of the PNG file
 # left, bottom, right, top = 9.6,-35.8,37.8,-20.0
-png_left, png_bottom, png_right, png_top = float(os.environ.get("WORLD_ATLAS_PNG_LONGITUDE_LEFT")),\
-                           float(os.environ.get("WORLD_ATLAS_PNG_LATITUDE_BOTTOM")),\
-                           float(os.environ.get("WORLD_ATLAS_PNG_LONGITUDE_RIGHT")),\
-                           float(os.environ.get("WORLD_ATLAS_PNG_LATITUDE_TOP"))
+png_left, png_bottom, png_right, png_top = float(os.environ.get("WIND_ATLAS_PNG_LONGITUDE_LEFT")),\
+                           float(os.environ.get("WIND_ATLAS_PNG_LATITUDE_BOTTOM")),\
+                           float(os.environ.get("WIND_ATLAS_PNG_LONGITUDE_RIGHT")),\
+                           float(os.environ.get("WIND_ATLAS_PNG_LATITUDE_TOP"))
 
 # build layer
-world_atlas_png_overlay = folium.raster_layers.ImageOverlay(
-    image=world_atlas_capacity_factor_file,
+wind_atlas_png_overlay = folium.raster_layers.ImageOverlay(
+    image=wind_atlas_capacity_factor_file,
     bounds = [[png_bottom, png_left], [png_top, png_right]],
     opacity=0.3,
     interactive=True,
     # mercator_project=True,  #errors if uncomment! Specify that the projection is mercator
-    # world_file_params=world_file_params,
+    # wind_file_params=wind_file_params,
 )
 # image_overlay.add_to(m)
-world_atlas_png_overlay.add_to(world_atlas_layer_png)
+wind_atlas_png_overlay.add_to(wind_atlas_layer_png)
 
 ########################################################################
-## World Atlas heatmap layer
+## Wind Atlas heatmap layer
 ########################################################################
-# get down scaling resolution of world atlas netcdf i.e. number of points to skip for lat lon values in array, to make things render faster
-world_atlas_resolution_reduction = int(os.environ.get("WORLD_ATLAS_RESOLUTION_REDUCTION"))
-# open world atlas netcdf
-world_atlas_netcdf = xr.open_dataset(os.environ.get("WORLD_ATLAS_CAPACITY_FACTORS_HEATMAP_FILE_LOCATION"))
+# get down scaling resolution of wind atlas netcdf i.e. number of points to skip for lat lon values in array, to make things render faster
+wind_atlas_resolution_reduction = int(os.environ.get("WIND_ATLAS_RESOLUTION_REDUCTION"))
+# open wind atlas netcdf
+wind_atlas_netcdf = xr.open_dataset(os.environ.get("WIND_ATLAS_CAPACITY_FACTORS_HEATMAP_FILE_LOCATION"))
 
-# Select every world_atlas_resolution_reduction latitude and longitude along with capacity_factor
-capacity_factor_subset = world_atlas_netcdf.sel(lat=world_atlas_netcdf.lat.values[::world_atlas_resolution_reduction], lon=world_atlas_netcdf.lon.values[::world_atlas_resolution_reduction])
+# Select every wind_atlas_resolution_reduction latitude and longitude along with capacity_factor
+capacity_factor_subset = wind_atlas_netcdf.sel(lat=wind_atlas_netcdf.lat.values[::wind_atlas_resolution_reduction], lon=wind_atlas_netcdf.lon.values[::wind_atlas_resolution_reduction])
 
 # Access the capacity_factor variable from the subset
-latitude_wa = capacity_factor_subset[os.environ.get("WORLD_ATLAS_HEATMAP_LATITUDE_VARIABLE_NAME")].values.astype(float)
-longitude_wa = capacity_factor_subset[os.environ.get("WORLD_ATLAS_HEATMAP_LONGITUDE_VARIABLE_NAME")].values.astype(float)
-values_wa = capacity_factor_subset[os.environ.get("WORLD_ATLAS_HEATMAP_DATA_VARIABLE_NAME")].values.astype(float)
+latitude_wa = capacity_factor_subset[os.environ.get("WIND_ATLAS_HEATMAP_LATITUDE_VARIABLE_NAME")].values.astype(float)
+longitude_wa = capacity_factor_subset[os.environ.get("WIND_ATLAS_HEATMAP_LONGITUDE_VARIABLE_NAME")].values.astype(float)
+values_wa = capacity_factor_subset[os.environ.get("WIND_ATLAS_HEATMAP_DATA_VARIABLE_NAME")].values.astype(float)
 values_wa[np.isnan(values_wa)] = 0.0  # Replace NaN with 0.0, you can choose a different value if needed
 lon_wa, lat_wa = np.meshgrid(longitude_wa, latitude_wa)
 # serialize data for folium
 data_wa = list(zip(lat_wa.flatten(), lon_wa.flatten(), values_wa.flatten()))
 # add to map layer
-plugins.HeatMap(data_wa, name='atlas',opacity=0.3).add_to(world_atlas_layer_heatmap)
+plugins.HeatMap(data_wa, name='atlas',opacity=0.3).add_to(wind_atlas_layer_heatmap)
+
+
+########################################################################
+## Mask layers
+########################################################################
+# add the mask layers to the map
+mask_layers = support_functions.read_masks_as_folium_layers()
+
 
 
 
@@ -174,10 +182,12 @@ m.get_root().html.add_child(folium.Element(legend_html))
 
 
 # Add FeatureGroups to the map, order matters!
-world_atlas_layer_png.add_to(m)
-world_atlas_layer_heatmap.add_to(m)
+wind_atlas_layer_png.add_to(m)
+wind_atlas_layer_heatmap.add_to(m)
 atlite_layer_heatmap.add_to(m)
 user_bound_layer_polygon.add_to(m)
+for mask_layer in mask_layers:   # masks
+    mask_layer.add_to(m)
 
 # Add layer control to the map
 folium.LayerControl().add_to(m)
@@ -192,11 +202,13 @@ app.layout = html.Div([
     # HEADER
     html.Div(
         [
-            html.H1("Please select your tiers here (polygons or points)", style={'textAlign': 'center', 'color': 'white', 'background-color': 'lightgreen', 'padding': '20px'}),
+            html.H1("Multiple tier per geometry option", style={'textAlign': 'center', 'color': 'white', 'background-color': 'lightgreen', 'padding': '20px'}),
             html.Ul([
-                html.Li("1. First select your tiers within the demarcated area. Note circles are considered points. Use polygon/rectangle to capture areas."),
-                html.Li("2. Second click export on the map"),
-                html.Li("3. Third copy the geojson file into the current working directory and run the tier_generation script")
+                html.Li("1. Please select your geometries within the demarcated area. You may use polygons, points, rectangles or circles. Note circles are considered points. For point geometries, only one tier is returned."),
+                html.Li("2. Ensure your geometries are within the bounding box of the Atlite data. Any geometry outside this box will be discarded."),
+                html.Li("3. Click the export on the map to save a geojson file of the geometry."),
+                html.Li("4. Copy the geojson file into the current working directory assets/user_geometry and set the environment varibale to the name of the geometry file. run the tier_generation script"),
+                html.Li("5. Run the second step tier generation script."),
             ], style={'list-style-type': 'none', 'margin': '30px','background-color': 'lightblue', 'padding': '30px'}),
         ],
         style={'margin-top': '20px', 'margin-bottom': '20px'}
@@ -211,8 +223,8 @@ app.layout = html.Div([
     # FOOTER
     html.Div(
         [
-            html.Img(src=app.get_asset_url('csir_logo.jpg'), style={'width': '150px', 'height': 'auto', 'margin-right': '20px'}),
-            html.Img(src=app.get_asset_url('leapre_logo.jpg'), style={'width': '150px', 'height': 'auto', 'margin-left': '20px'}),
+            html.Img(src=app.get_asset_url('static/csir_logo.jpg'), style={'width': '150px', 'height': 'auto', 'margin-right': '20px'}),
+            html.Img(src=app.get_asset_url('static/leapre_logo.jpg'), style={'width': '150px', 'height': 'auto', 'margin-left': '20px'}),
         ],
         style={'bottom': 0, 'width': '95vw', 'padding': '20px', 'background-color': 'lightgray', 'text-align': 'center'}
     )
