@@ -143,7 +143,7 @@ def visualize_geometries(geographical_bounds_atlite_data,geometry_table_list,val
     # HEADER
     main_header = html.Div(
         [
-            html.H1("Single tier per geometry option 5 (Step 2 of 2)", style={'textAlign': 'center', 'color': 'white', 'background-color': 'lightgreen', 'padding': '20px'}),
+            html.H1("Single tier per geometry option 6 (Step 2 of 2)", style={'textAlign': 'center', 'color': 'white', 'background-color': 'lightgreen', 'padding': '20px'}),
             html.Ul([
                 html.Li("1. Please find your geometries classified here (polygons and points, inside or outside the bounding box)."),
                 html.Li("2. Please take note of the tier number assigned to your geometry."),
@@ -252,12 +252,12 @@ def visualize_geometries(geographical_bounds_atlite_data,geometry_table_list,val
     app.run_server(debug=True)
 
 #################################################
-## Option 5: main function to process geometries
+## Option 6: main function to process geometries
 #################################################
 
-def option_5_process_geometries_into_tiers():
+def option_6_process_geometries_into_tiers():
     # Define the path to the GeoJSON file
-    geojson_path = os.environ.get("OPTION_5_USER_GEOMETRIES_GEOJSON_FILE")
+    geojson_path = os.environ.get("OPTION_6_USER_GEOMETRIES_GEOJSON_FILE")
 
     # open the file
     try:
@@ -398,30 +398,30 @@ def option_5_process_geometries_into_tiers():
     valid_output_tiers = valid_output_tiers.div(float(os.environ.get("MAXIMUM_CAPACITY"))) # divide by the weightings
 
     # check if output directories are created
-    if not os.path.exists(os.environ.get('OPTION_5_OUTPUT_FOLDER')):
-        os.makedirs(os.environ.get('OPTION_5_OUTPUT_FOLDER'))
+    if not os.path.exists(os.environ.get('OPTION_6_OUTPUT_FOLDER')):
+        os.makedirs(os.environ.get('OPTION_6_OUTPUT_FOLDER'))
 
     # for reference, save tiers to csv file
-    valid_output_tiers.to_csv(os.path.join(os.environ.get('OPTION_5_OUTPUT_FOLDER'),os.environ.get("OPTION_5_OUTPUT_TIERS_FILE")))
+    valid_output_tiers.to_csv(os.path.join(os.environ.get('OPTION_6_OUTPUT_FOLDER'),os.environ.get("OPTION_6_OUTPUT_TIERS_FILE")))
 
 
-    print("... Saved output tiers file to:",os.path.join(os.environ.get('OPTION_5_OUTPUT_FOLDER'),os.environ.get("OPTION_5_OUTPUT_TIERS_FILE")))
+    print("... Saved output tiers file to:",os.path.join(os.environ.get('OPTION_6_OUTPUT_FOLDER'),os.environ.get("OPTION_6_OUTPUT_TIERS_FILE")))
     print("... Tier generation completed successfully!")
     print("Option_5 completed successfully!")
     print("----------------------------------------------------------------\n")
 
 
 
-    if os.environ.get('OPTION_5_VIEW_VALID_GEOMETRIES').lower() == "true":
+    if os.environ.get('OPTION_6_VIEW_VALID_GEOMETRIES').lower() == "true":
         print("\nVisualization starting up ...")
         # build the Atlite bounding box:
         geographical_bounds_atlite_data = [[min_latitude, min_longitude], [max_latitude, max_longitude]]
         #visualize with Dash
         visualize_geometries(geographical_bounds_atlite_data,geometry_table_list,valid_output_tiers,geometry_layer_list)
     else:
-        print("\nNo visualization selected. If you want to visualize thedata set the OPTION_5_VIEW_VALID_GEOMETRIES to true.")
+        print("\nNo visualization selected. If you want to visualize thedata set the OPTION_6_VIEW_VALID_GEOMETRIES to true.")
 
 if __name__ == '__main__':
-    print("Starting tier processing forOption 5: single tier per user defined geometry ...")
-    option_5_process_geometries_into_tiers()
+    print("Starting tier processing forOption 6: single tier per user defined geometry ...")
+    option_6_process_geometries_into_tiers()
 
