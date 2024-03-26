@@ -47,19 +47,19 @@ Parameters and variables can be set in the .env file. Or via the command line in
 Viewing all tiers
 -------------------
 
-You can run the view_all_tiers.py script to show all the tiers of all the Options that were generated. These tiers are shown ona web browser interactive graph page.
+You can run the view_all_tiers.py script to show all the tiers of all the Options that were generated. These tiers are shown on a web browser interactive graph page.
 
 
 Notes:
 -------
 
-- Option 1, 2,3 and 4 (and 7) dont require user input on a browser. Options 5 and 6 require the user input on a browser.
+- Option 1, 2,3 and 4 (and 7) don't require user input on a browser. Options 5 and 6 require the user input on a browser.
 - All relevant Python packages are found in requirements.txt (I may be missing some :-)) 
 - Make sure to copy the sample.env to an .env file. This .env file, which contains all the user settings, is the user settings. Rather not change the assets folder. Keep that as is. The file names you can change as you need. Edit this file to configure the preprocessing scripts.
 - Too high a resolution is not a good idea for the world atlas netcdf data, this will significantly increase the rendering time.
 - Only single band (not classified) .tif files used as masks, make sure they each have an extent. You can add as many as you want in the masks folder. A method is described in this readme on how to convert a classified raster to a single band raster.
-- Please give step 1 for Option 5 and 6 some time before loading the map on the browser, it can takea while to read in the mask files
-
+- Please give step 1 for Option 5 and 6 some time before loading the map on the browser, it can take a while to read in the mask files
+- The scripts for step 2 in Options 5 and 6, has a variable, OPTION_5_VIEW_VALID_GEOMETRIES and OPTION_6_VIEW_VALID_GEOMETRIES, which enables the user to visualize the map and geometries in the browser. The link to the page is shown in the console output as per example of this picture ![Link to show geometries and tiers on a web browser](assets/static/server_link.PNG)
 
 
 World Atlas Data preprep

@@ -22,7 +22,7 @@ def average_capacity_factors_atlite():
     print("... Averaged atlite capacity factor data.")
 
 
-    # Option 1A: Split tiers according to percentage bounds:
+    # Option 3: Split tiers according to percentage bounds:
     def get_tier_percentage_bound(lats,longs,atlite_data,selected_data):
         # count as the values get added on to take the average at the end
         number_columns_in_tier = 0
@@ -92,7 +92,7 @@ def average_capacity_factors_atlite():
     selected_indexes_tier4 = atlite_capacity_factors_avg.where((atlite_capacity_factors_avg>bottom_bound_tier4) & (atlite_capacity_factors_avg<top_bound_tier4))#, drop=True)
     selected_indexes_tier5 = atlite_capacity_factors_avg.where((atlite_capacity_factors_avg>bottom_bound_tier5) & (atlite_capacity_factors_avg<top_bound_tier5))#, drop=True)
 
-    # Generate the tiers for option 1A:
+    # Generate the tiers:
     bound_tier1 = get_tier_percentage_bound(atlite_capacity_factors[os.environ.get("AVG_ATLITE_LATITUDE_VARIABLE_NAME")].values,atlite_capacity_factors[os.environ.get("AVG_ATLITE_LONGITUDE_VARIABLE_NAME")].values,copy.deepcopy(atlite_capacity_factors),selected_indexes_tier1)
     bound_tier2 = get_tier_percentage_bound(atlite_capacity_factors[os.environ.get("AVG_ATLITE_LATITUDE_VARIABLE_NAME")].values,atlite_capacity_factors[os.environ.get("AVG_ATLITE_LONGITUDE_VARIABLE_NAME")].values,copy.deepcopy(atlite_capacity_factors),selected_indexes_tier2)
     bound_tier3 = get_tier_percentage_bound(atlite_capacity_factors[os.environ.get("AVG_ATLITE_LATITUDE_VARIABLE_NAME")].values,atlite_capacity_factors[os.environ.get("AVG_ATLITE_LONGITUDE_VARIABLE_NAME")].values,copy.deepcopy(atlite_capacity_factors),selected_indexes_tier3)
@@ -105,7 +105,7 @@ def average_capacity_factors_atlite():
     print(bound_tier5)
 
     # Create a DataFrame
-    tier_dataframe_option1A = pd.DataFrame({
+    tier_dataframe_option_3 = pd.DataFrame({
         'tier_1': bound_tier1,
         'tier_2': bound_tier2,
         'tier_3': bound_tier3,
@@ -118,7 +118,7 @@ def average_capacity_factors_atlite():
         os.makedirs(os.environ.get('OPTION_3_OUTPUT_FOLDER'))
 
 
-    tier_dataframe_option1A.to_csv(os.path.join(os.environ.get('OPTION_3_OUTPUT_FOLDER'),os.environ.get("BOUND_CAPACITY_FACTORS_TIME_SERIES_FILE_3")),index=False)
+    tier_dataframe_option_3.to_csv(os.path.join(os.environ.get('OPTION_3_OUTPUT_FOLDER'),os.environ.get("BOUND_CAPACITY_FACTORS_TIME_SERIES_FILE_3")),index=False)
 
 
     print("Option_3 completed successfully!")

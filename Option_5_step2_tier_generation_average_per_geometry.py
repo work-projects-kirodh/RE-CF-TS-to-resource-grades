@@ -12,6 +12,7 @@ import geopandas as gpd
 from shapely.geometry import box, Point
 import os
 from dash import dash_table
+import plotly.express as px
 
 import Option_Support_Functions as support_functions
 
@@ -65,6 +66,8 @@ def calculate_valid_tiers(atlite_data,points_geometry,geometry):
     # returns a list of numbers for the tier
     # if point, then find the closest point on the grid and use this as the tier
     if geometry == "Point":
+        print("... Dealing with POINT geometry")
+
         # Find the nearest latitude and longitude in the xarray dataset
         lat_index = np.abs(atlite_data[os.environ.get("AVG_ATLITE_LATITUDE_VARIABLE_NAME")] - points_geometry.y).argmin().item()
         lon_index = np.abs(atlite_data[os.environ.get("AVG_ATLITE_LONGITUDE_VARIABLE_NAME")] - points_geometry.x).argmin().item()
@@ -75,10 +78,17 @@ def calculate_valid_tiers(atlite_data,points_geometry,geometry):
 
         # Select the data at the nearest point
         capacity_factors_at_nearest_point = atlite_data[os.environ.get("AVG_ATLITE_DATA_VARIABLE_NAME")][:,lat_index,lon_index]
+
+        print("... Generated tiers successfully: ")
+        print(capacity_factors_at_nearest_point)
+        print("#########################################\n")
+
         return capacity_factors_at_nearest_point.values
 
     # else if it is a polygon, then find all coordinates within the polygon and then average spatially
     elif geometry == "Polygon":
+        print("... Dealing with POLYGON geometry")
+
         # Extract lat and lon values from the xarray dataset
         lats = atlite_data[os.environ.get("AVG_ATLITE_LATITUDE_VARIABLE_NAME")].values
         lons = atlite_data[os.environ.get("AVG_ATLITE_LONGITUDE_VARIABLE_NAME")].values
@@ -86,20 +96,22 @@ def calculate_valid_tiers(atlite_data,points_geometry,geometry):
         # Create a list of Point objects for each (lat, lon) pair in the dataset
         points = [Point(lon, lat) for lat, lon in zip(lats, lons)]
 
-        # Check which points lie within the polygon, <-- I suppose a secondcheck isgood.
-        points_within_polygon = [point for point in points if point.within(points_geometry)]
-        if points_within_polygon == []:
-            return None
-
         # Now you can use the indices of the points within the polygon to select data from the xarray dataset
-        selected_data = atlite_data.sel(latitude=[point.y for point in points_within_polygon],longitude=[point.x for point in points_within_polygon])
+        selected_data = atlite_data.sel(latitude=[point.y for point in points],longitude=[point.x for point in points])
 
         # Spatially average the selected data over lat and lon dimensions
         spatially_averaged_data = selected_data.mean(dim=[os.environ.get("AVG_ATLITE_LATITUDE_VARIABLE_NAME"), os.environ.get("AVG_ATLITE_LONGITUDE_VARIABLE_NAME")], skipna=True)
+
+        print("... Generated tiers successfully: ")
+        print(spatially_averaged_data)
+        print("#########################################\n")
+
         return spatially_averaged_data[os.environ.get("AVG_ATLITE_DATA_VARIABLE_NAME")].values
 
     # else return nothing
     else:
+        print("... No tier generated! You provided a geometry of type: ",geometry)
+        print("#########################################\n")
         return None
 
 
@@ -191,7 +203,7 @@ def visualize_geometries(geographical_bounds_atlite_data,geometry_table_list,val
                     'color': 'green',
                 },
                 {
-                    'if': {'column_id': 'Result', 'filter_query': '{Result} eq "Outside"'},
+                    'if': {'column_id': 'Result', 'filter_query': '{Result} eq "Outside, Invalid"'},
                     'color': 'red',
                 },
                 {
@@ -210,27 +222,19 @@ def visualize_geometries(geographical_bounds_atlite_data,geometry_table_list,val
 
 
     #######################################
-    ## Second section
+    ## Graphing of tiers
     #######################################
 
-    valid_tiers = html.Div([
-        html.Div(
-            id='valid-tiers',
-            style={
-                'text-align': 'center',
-                'border': '2px solid #4CAF50',  # Green border color
-                'border-radius': '10px',  # Rounded corners
-                'padding': '10px',  # Padding inside the box
-                'background-color': '#87CEFA',  # Light blue background color
-                'width': '300px',  # Adjust box width
-                'margin': '0 auto',  # Center the box horizontally
-            },
-            children=[
-                html.H3("Valid tiers for selection", style={'margin-bottom': '10px'}),
-                html.Ul(id='tiers-list', children=[html.Li(i) for i in valid_output_tiers.columns],style={'padding-inline-start': '0', 'list-style-type': 'none'},),
-            ],
-        ),
+    graphs = html.Div(id='graph-container', children=[
+        html.H1("Tier Graphs",style={'textAlign': 'center',}),
+        html.Div(id='graphs', children=[
+            html.Div([
+                # dash.dcc.Graph(figure=px.line(dataframe, x=dataframe.index, y=dataframe.columns, title=f'Tier: {tier_label}',labels={'index': 'Time Steps', 'value': 'Capacity Factor'})) for entry in valid_output_tiers for tier_label, dataframe in entry.items()
+                dash.dcc.Graph(figure=px.line(valid_output_tiers, x=valid_output_tiers.index, y=valid_output_tiers.columns, title=f'Tier graph',labels={'index': 'Time Steps', 'value': 'Capacity Factor'}))
+            ])
+        ])
     ])
+
 
     #######################################
     ## Pull all layout elements together
@@ -242,9 +246,10 @@ def visualize_geometries(geographical_bounds_atlite_data,geometry_table_list,val
         main_header,
         table_layout,
         spacing,
-        valid_tiers,
         spacing,
         map_layout,
+        spacing,
+        graphs,
         spacing,
         footer,
     ])
@@ -324,7 +329,7 @@ def option_5_process_geometries_into_tiers():
                 'Tier': tier_label,
                 'Geometry Type': geometry_type,
                 'Coordinates': str(row['geometry']),
-                'Result': 'Inside' if is_within_bounds else 'Outside',
+                'Result': 'Inside, Valid' if is_within_bounds else 'Outside, Invalid',
             })
 
             # generate tier data if inside the bounding box
@@ -374,7 +379,7 @@ def option_5_process_geometries_into_tiers():
                 'Tier': tier_label,
                 'Geometry Type': geometry_type,
                 'Coordinates': str(row['geometry']),
-                'Result': 'Inside' if is_within_bounds else 'Outside',
+                'Result': 'Inside, Valid' if is_within_bounds else 'Outside, Invalid',
             })
 
             # generate tier data
