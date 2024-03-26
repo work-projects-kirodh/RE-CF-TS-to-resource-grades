@@ -13,9 +13,12 @@ from shapely.geometry import box, Point
 import os
 from dash import dash_table
 import plotly.express as px
+from dotenv import load_dotenv
 
 import Option_Support_Functions as support_functions
 
+# Load variables from the .env file
+load_dotenv()
 
 ################################
 # Helper function: Check geometries, inside or outside bounding box

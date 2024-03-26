@@ -59,7 +59,7 @@ def average_capacity_factors_atlite():
                 # Determine the next number for the new column name
                 next_column_number = len(tiers_raw_df.columns) + 1
                 # Create a new column name
-                new_column_name = f'pre_tier_{next_column_number}'
+                new_column_name = f'tier_{next_column_number}'
                 # Add the new column to the DataFrame
                 tiers_raw_df[new_column_name] = atlite_capacity_factors[os.environ.get("DATA_VARIABLE_NAME")].values[:,lat,lon]
                 # print(value)
