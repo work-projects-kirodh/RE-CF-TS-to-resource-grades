@@ -8,14 +8,71 @@ import os
 from dotenv import load_dotenv
 import copy
 import pandas as pd
+import argparse
 
 import Option_Support_Functions as support_functions
 
-# Load variables from the .env file
-load_dotenv()
+
+################################
+# args section
+################################
+def parse_arguments():
+    parser = argparse.ArgumentParser(description="Script to calculate average capacity factors.")
+    parser.add_argument('--ATLITE_DUMMY_DATA', default=None, required=False, help="Path to data folder.")
+    parser.add_argument('--DUMMY_START_DATE', default=None, required=False, help="Start date.")
+    parser.add_argument('--DUMMY_END_DATE', default=None, required=False, help="End date.")
+    parser.add_argument('--DUMMY_LATITUDE_BOTTOM', default=None, required=False, help="Latitude bottom.")
+    parser.add_argument('--DUMMY_LATITUDE_TOP', default=None, required=False, help="Latitude top.")
+    parser.add_argument('--DUMMY_LONGITUDE_LEFT', default=None, required=False, help="Longitude left.")
+    parser.add_argument('--DUMMY_LONGITUDE_RIGHT', default=None, required=False, help="Longitude right.")
+    parser.add_argument('--MAXIMUM_CAPACITY', default=None, required=False, help="Maximum capacity.")
+    parser.add_argument('--DATA_VARIABLE_NAME', default=None, required=False, help="Data variable name.")
+    parser.add_argument('--TIME_VARIABLE_NAME', default=None, required=False, help="Time variable name.")
+    parser.add_argument('--AVG_ATLITE_CAPACITY_FACTORS_FILE_LOCATION', default=None, required=False,help="Average ATLITE capacity factors file location.")
+    parser.add_argument('--PERCENT_UPPER_CAPACITY_FACTORS_1', default=None, required=False,help="Percentage upper capacity factors 1.")
+    parser.add_argument('--OPTION_1_OUTPUT_FOLDER', default=None, required=False, help="Option 1 output folder.")
+    parser.add_argument('--PERCENT_UPPER_CAPACITY_FACTORS_TIME_SERIES_FILE_1', default=None, required=False,help="Percentage upper capacity factors time series file 1.")
+    parser.add_argument('--PERCENT_UPPER_CAPACITY_FACTORS_LOCATION_FILE_1', default=None, required=False,help="Percentage upper capacity factors location file 1.")
+    parser.add_argument('--SCALE_CAPACITY_FACTORS', default=None, required=False, help="Scale capacity factors.")
+
+    args = parser.parse_args()
+    print(args)
 
 
-def average_capacity_factors_atlite():
+    # Check if any of the arguments are provided
+    if any(arg is None for arg in vars(args).values()):
+        raise ValueError("No arguments provided.")
+
+    return args
+
+
+def load_from_env():
+    load_dotenv()
+    env_vars =  {
+        "ATLITE_DUMMY_DATA" : os.environ.get("ATLITE_DUMMY_DATA"),
+        "DUMMY_START_DATE" : os.environ.get("DUMMY_START_DATE"),
+        "DUMMY_END_DATE" : os.environ.get("DUMMY_END_DATE"),
+        "DUMMY_LATITUDE_BOTTOM" : os.environ.get("DUMMY_LATITUDE_BOTTOM"),
+        "DUMMY_LATITUDE_TOP" : os.environ.get("DUMMY_LATITUDE_TOP"),
+        "DUMMY_LONGITUDE_LEFT" : os.environ.get("DUMMY_LONGITUDE_LEFT"),
+        "DUMMY_LONGITUDE_RIGHT" : os.environ.get("DUMMY_LONGITUDE_RIGHT"),
+        "MAXIMUM_CAPACITY" : os.environ.get("MAXIMUM_CAPACITY"),
+        "DATA_VARIABLE_NAME" : os.environ.get("DATA_VARIABLE_NAME"),
+        "TIME_VARIABLE_NAME" : os.environ.get("TIME_VARIABLE_NAME"),
+        "AVG_ATLITE_CAPACITY_FACTORS_FILE_LOCATION" : os.environ.get("AVG_ATLITE_CAPACITY_FACTORS_FILE_LOCATION"),
+        "PERCENT_UPPER_CAPACITY_FACTORS_1" : os.environ.get("PERCENT_UPPER_CAPACITY_FACTORS_1"),
+        "OPTION_1_OUTPUT_FOLDER" : os.environ.get("OPTION_1_OUTPUT_FOLDER"),
+        "PERCENT_UPPER_CAPACITY_FACTORS_TIME_SERIES_FILE_1" : os.environ.get("PERCENT_UPPER_CAPACITY_FACTORS_TIME_SERIES_FILE_1"),
+        "PERCENT_UPPER_CAPACITY_FACTORS_LOCATION_FILE_1" : os.environ.get("PERCENT_UPPER_CAPACITY_FACTORS_LOCATION_FILE_1"),
+        "SCALE_CAPACITY_FACTORS" : os.environ.get("SCALE_CAPACITY_FACTORS"),
+    }
+    if None in env_vars.values():
+        # raise ValueError("One or more environment variables are not set in the .env file.")
+        print("One or more environment variables are not set in the .env file.")
+    return env_vars
+
+
+def average_capacity_factors_atlite(ATLITE_DUMMY_DATA, DUMMY_START_DATE, DUMMY_END_DATE, DUMMY_LATITUDE_BOTTOM, DUMMY_LATITUDE_TOP, DUMMY_LONGITUDE_LEFT, DUMMY_LONGITUDE_RIGHT, MAXIMUM_CAPACITY, DATA_VARIABLE_NAME, TIME_VARIABLE_NAME, AVG_ATLITE_CAPACITY_FACTORS_FILE_LOCATION, PERCENT_UPPER_CAPACITY_FACTORS_1, OPTION_1_OUTPUT_FOLDER, PERCENT_UPPER_CAPACITY_FACTORS_TIME_SERIES_FILE_1, PERCENT_UPPER_CAPACITY_FACTORS_LOCATION_FILE_1, SCALE_CAPACITY_FACTORS):
     # average the capacity factors according to time:
     atlite_capacity_factors, atlite_capacity_factors_avg = support_functions.create_average_capacity_factor_file_atlite(os.environ.get('ATLITE_DUMMY_DATA'),os.environ.get("DUMMY_START_DATE"),os.environ.get("DUMMY_END_DATE"),os.environ.get("DUMMY_LATITUDE_BOTTOM"),os.environ.get("DUMMY_LATITUDE_TOP"),os.environ.get("DUMMY_LONGITUDE_LEFT"),os.environ.get("DUMMY_LONGITUDE_RIGHT"),os.environ.get("MAXIMUM_CAPACITY"),os.environ.get("DATA_VARIABLE_NAME"),os.environ.get("TIME_VARIABLE_NAME"),os.environ.get("AVG_ATLITE_CAPACITY_FACTORS_FILE_LOCATION"))
     print("... Read averaged atlite capacity factor data.")
@@ -89,4 +146,38 @@ def average_capacity_factors_atlite():
 
 if __name__ == '__main__':
 
-    average_capacity_factors_atlite()
+    try:
+
+        args = parse_arguments()
+        # args = parser.parse_args()
+
+        average_capacity_factors_atlite(**vars(args))
+
+        # # Check if all arguments are present
+        # if not all(vars(args).values()):
+        #     print("hello not all here!")
+        #     # parser.error("All arguments are required.")
+
+    except Exception as e:
+        print(e)
+        try:
+            print("trying .env file")
+            # Load variables from the .env file
+            args = load_from_env()
+            average_capacity_factors_atlite(**args)
+
+            print(",",os.environ.get("DATA_VARIABLE_NAME"))
+
+
+            print("Using .env file")
+        except Exception as e:
+            print(e)
+            print("User args or .env file missing")
+            raise ValueError("Could not find args or load .env file. User args or .env file missing.")
+
+    # average_capacity_factors_atlite(**vars(args))
+    # average_capacity_factors_atlite(**vars(args))
+    # average_capacity_factors_atlite()
+
+    # example use:
+    # python Option_1_upper_percentage_atlite --ATLITE_DUMMY_DATA True  --DUMMY_START_DATE  '2023-01-01' --DUMMY_END_DATE '2024-01-01'  --DUMMY_LATITUDE_BOTTOM  -32 --DUMMY_LATITUDE_TOP -30  --DUMMY_LONGITUDE_LEFT 26  --DUMMY_LONGITUDE_RIGHT 28   --MAXIMUM_CAPACITY  50  --DATA_VARIABLE_NAME capacity_factors  --TIME_VARIABLE_NAME  time  --AVG_ATLITE_CAPACITY_FACTORS_FILE_LOCATION "assets/avg_atlite_capacity_factors.nc"  --PERCENT_UPPER_CAPACITY_FACTORS_1 10  --OPTION_1_OUTPUT_FOLDER  "assets/option_1_output"  --PERCENT_UPPER_CAPACITY_FACTORS_TIME_SERIES_FILE_1  "option_1_top_percentage_capacity_factor_time_series.csv"  --PERCENT_UPPER_CAPACITY_FACTORS_LOCATION_FILE_1  "option_1_top_percentage_locations.csv"  --SCALE_CAPACITY_FACTORS True
