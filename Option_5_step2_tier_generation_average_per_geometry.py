@@ -397,25 +397,40 @@ def option_5_process_geometries_into_tiers():
                 else:
                     print("... No tier for ", tier_label)
 
+        else:
+            # unknown geometry type
+            print("... ",geometry_type," is not supported. Only POLYGON, or POINTS allowed.")
+
+
     # format the tier data for the tier piece selection
     print("\n... Finished compiling tier data successfully:")
     print(tier_data)
     valid_output_tiers = pd.DataFrame(tier_data)
 
-    print("... Rescaling tiers with maximum capacity: ",os.environ.get("MAXIMUM_CAPACITY"))
-    valid_output_tiers = valid_output_tiers.div(float(os.environ.get("MAXIMUM_CAPACITY"))) # divide by the weightings
-
     # check if output directories are created
     if not os.path.exists(os.environ.get('OPTION_5_OUTPUT_FOLDER')):
         os.makedirs(os.environ.get('OPTION_5_OUTPUT_FOLDER'))
 
+    # scale capacity factors if required:
+    if os.environ.get('SCALE_CAPACITY_FACTORS').lower() == "true":
+        valid_output_tiers = valid_output_tiers / float(os.environ.get("MAXIMUM_CAPACITY"))  # divide by the weightings
+        print("\n... Capacity factors were scaled by division of maximum capacity:", os.environ.get("MAXIMUM_CAPACITY"))
+
     # for reference, save tiers to csv file
     valid_output_tiers.to_csv(os.path.join(os.environ.get('OPTION_5_OUTPUT_FOLDER'),os.environ.get("OPTION_5_OUTPUT_TIERS_FILE")))
 
+    # Save valid geometries to file:
+    # Convert the list of dictionaries to a pandas DataFrame
+    geometry_table_df = pd.DataFrame(geometry_table_list)
 
-    print("... Saved output tiers file to:",os.path.join(os.environ.get('OPTION_5_OUTPUT_FOLDER'),os.environ.get("OPTION_5_OUTPUT_TIERS_FILE")))
+    # Save the DataFrame to a CSV file
+    geometry_table_df.to_csv(os.path.join(os.environ.get('OPTION_5_OUTPUT_FOLDER'),os.environ.get("OPTION_5_GEOMETRY_REFERENCE_FILE")))
+
+
+
+    print("\n... Saved output tiers file to:",os.path.join(os.environ.get('OPTION_5_OUTPUT_FOLDER'),os.environ.get("OPTION_5_OUTPUT_TIERS_FILE")))
     print("... Tier generation completed successfully!")
-    print("Option_5 completed successfully!")
+    print("\nOption_5 completed successfully!")
     print("----------------------------------------------------------------\n")
 
 

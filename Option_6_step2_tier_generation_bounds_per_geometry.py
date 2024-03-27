@@ -111,11 +111,11 @@ def calculate_valid_tiers(atlite_data,atlite_data_avg,points_geometry,geometry):
         print("... Dealing with POLYGON geometry")
 
         # Convert the PERCENT_UPPER_TIER1_CAPACITY_FACTORS variable to a list of floats
-        percent_upper_tier1_capacity_factors = list(map(float, os.environ.get("OPTION_6_PERCENT_UPPER_TIER1_CAPACITY_FACTORS").split(',')))
-        percent_upper_tier2_capacity_factors = list(map(float, os.environ.get("OPTION_6_PERCENT_UPPER_TIER2_CAPACITY_FACTORS").split(',')))
-        percent_upper_tier3_capacity_factors = list(map(float, os.environ.get("OPTION_6_PERCENT_UPPER_TIER3_CAPACITY_FACTORS").split(',')))
-        percent_upper_tier4_capacity_factors = list(map(float, os.environ.get("OPTION_6_PERCENT_UPPER_TIER4_CAPACITY_FACTORS").split(',')))
-        percent_upper_tier5_capacity_factors = list(map(float, os.environ.get("OPTION_6_PERCENT_UPPER_TIER5_CAPACITY_FACTORS").split(',')))
+        percent_upper_tier1_capacity_factors = list(map(float, os.environ.get("PERCENT_UPPER_TIER1_CAPACITY_FACTORS").split(',')))
+        percent_upper_tier2_capacity_factors = list(map(float, os.environ.get("PERCENT_UPPER_TIER2_CAPACITY_FACTORS").split(',')))
+        percent_upper_tier3_capacity_factors = list(map(float, os.environ.get("PERCENT_UPPER_TIER3_CAPACITY_FACTORS").split(',')))
+        percent_upper_tier4_capacity_factors = list(map(float, os.environ.get("PERCENT_UPPER_TIER4_CAPACITY_FACTORS").split(',')))
+        percent_upper_tier5_capacity_factors = list(map(float, os.environ.get("PERCENT_UPPER_TIER5_CAPACITY_FACTORS").split(',')))
 
         # Find the top % values from the temporal average (sorts out user swapping max and min)
         upper_percentile_tier1 = 1.0 - min(percent_upper_tier1_capacity_factors) / 100.0
@@ -522,12 +522,15 @@ def option_6_process_geometries_into_tiers():
                     # format the tier data for the tier piece selection
                     valid_output_tiers = potential_tier
                     print("\n... Finished compiling tier: ",tier_label,": successfully:")
-                    print("... Rescaling tiers with maximum capacity: ", os.environ.get("MAXIMUM_CAPACITY"))
-                    valid_output_tiers = valid_output_tiers.div(float(os.environ.get("MAXIMUM_CAPACITY")))  # divide by the weightings
+
+                    # scale capacity factors if required:
+                    if os.environ.get('SCALE_CAPACITY_FACTORS').lower() == "true":
+                        valid_output_tiers = valid_output_tiers / float(os.environ.get("MAXIMUM_CAPACITY"))  # divide by the weightings
+                        print("\n... Capacity factors were scaled by division of maximum capacity:",os.environ.get("MAXIMUM_CAPACITY"))
 
                     # Save tiers to csv file
                     valid_output_tiers.to_csv(os.path.join(os.environ.get('OPTION_6_OUTPUT_FOLDER'),str(tier_label)+"_"+os.environ.get("OPTION_6_OUTPUT_TIERS_FILE")))
-                    print("... Saved output tiers file to:", os.path.join(os.environ.get('OPTION_6_OUTPUT_FOLDER'),str(tier_label)+"_"+os.environ.get("OPTION_6_OUTPUT_TIERS_FILE")))
+                    print("\n... Saved output tiers file to:", os.path.join(os.environ.get('OPTION_6_OUTPUT_FOLDER'),str(tier_label)+"_"+os.environ.get("OPTION_6_OUTPUT_TIERS_FILE")))
 
                     # otherwise, no tier for this point
                 else:
@@ -584,8 +587,12 @@ def option_6_process_geometries_into_tiers():
                     # format the tier data for the tier piece selection
                     valid_output_tiers = potential_tier
                     print("\n... Finished compiling tier: ",tier_label,": successfully:")
-                    print("... Rescaling tiers with maximum capacity: ", os.environ.get("MAXIMUM_CAPACITY"))
-                    valid_output_tiers = valid_output_tiers.div(float(os.environ.get("MAXIMUM_CAPACITY")))  # divide by the weightings
+
+                    # scale capacity factors if required:
+                    if os.environ.get('SCALE_CAPACITY_FACTORS').lower() == "true":
+                        valid_output_tiers = valid_output_tiers / float(os.environ.get("MAXIMUM_CAPACITY"))  # divide by the weightings
+                        print("\n... Capacity factors were scaled by division of maximum capacity:",os.environ.get("MAXIMUM_CAPACITY"))
+
 
                     # Save tiers to csv file
                     valid_output_tiers.to_csv(os.path.join(os.environ.get('OPTION_6_OUTPUT_FOLDER'),str(tier_label)+"_"+os.environ.get("OPTION_6_OUTPUT_TIERS_FILE")))
@@ -606,9 +613,9 @@ def option_6_process_geometries_into_tiers():
     geometry_table_df.to_csv(os.path.join(os.environ.get('OPTION_6_OUTPUT_FOLDER'),os.environ.get("OPTION_6_GEOMETRY_REFERENCE_FILE")))
 
 
-    print("... Saved output reference geometry file to:",os.path.join(os.environ.get('OPTION_6_OUTPUT_FOLDER'),os.environ.get("OPTION_6_GEOMETRY_REFERENCE_FILE")))
+    print("\n... Saved output reference geometry file to:",os.path.join(os.environ.get('OPTION_6_OUTPUT_FOLDER'),os.environ.get("OPTION_6_GEOMETRY_REFERENCE_FILE")))
     print("... Tier generation completed successfully!")
-    print("Option_6 completed successfully!")
+    print("\nOption_6 completed successfully!")
     print("----------------------------------------------------------------\n")
 
 

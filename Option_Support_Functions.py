@@ -6,7 +6,7 @@ Author: Kirodh Boodhraj
 import os
 import xarray as xr
 import numpy as np
-import temporary_data as temp_data
+import pandas as pd
 from dotenv import load_dotenv
 import rasterio
 import folium
@@ -14,11 +14,57 @@ import folium
 # Load variables from the .env file
 load_dotenv()
 
+
+# Atlite data temporary data functions
+# Function to generate random data
+def generate_random_data(latitudes, longitudes):
+    maximum_capacity = os.environ.get("MAXIMUM_CAPACITY") # MW
+    return np.random.rand(len(latitudes), len(longitudes)),maximum_capacity
+
+def create_temporary_atlite_dataset():
+    # Step 1: Create hourly date times in a Pandas series
+    hourly_date_times = pd.date_range(start=os.environ.get("DUMMY_START_DATE"), end=os.environ.get("DUMMY_END_DATE"), freq='H')
+
+
+    """ temporary fix start """
+    # Step 2: Create equally spaced intervals of 0.1 degrees between latitudes and longitudes
+    latitude_intervals = np.arange(float(os.environ.get("DUMMY_LATITUDE_BOTTOM")), float(os.environ.get("DUMMY_LATITUDE_TOP")), 0.1)
+    longitude_intervals = np.arange(float(os.environ.get("DUMMY_LONGITUDE_LEFT")), float(os.environ.get("DUMMY_LONGITUDE_RIGHT")), 0.1)
+
+    # Step 3: Create an empty Xarray dataset
+    atlite_capacity_factors = xr.Dataset(
+        {
+            'capacity_factors': (['time', 'latitude', 'longitude'], np.zeros((len(hourly_date_times), len(latitude_intervals), len(longitude_intervals))))
+        },
+        coords={
+            'time': hourly_date_times,
+            'latitude': latitude_intervals,
+            'longitude': longitude_intervals
+        }
+    )
+    """ temporary fix end """
+
+    # Step 4: Loop through each hourly timestep and generate random data
+    for i, time in enumerate(hourly_date_times):
+        # print("At timestep: ",i)
+        #### Step 1:
+        # TODO: Link to Nicolene's algorithm here
+        """ temporary fix """
+        capacity_factors, maximum_capacity = generate_random_data(latitude_intervals, longitude_intervals)
+        atlite_capacity_factors[os.environ.get('DATA_VARIABLE_NAME')][i, :, :] = capacity_factors
+        """ temporary fix """
+
+    # print(atlite_capacity_factors["latitude"],atlite_capacity_factors["longitude"])
+
+    return atlite_capacity_factors
+
+
+# Atlite data
 def create_average_capacity_factor_file_atlite():
     # TODO: read in the capacity factors after running WP3 codes:
     # xr.open_dataset(os.environ.get('ATLITE_CAPACITY_FACTORS_FILE_LOCATION'))
     ## use temp data for now:
-    atlite_capacity_factors = temp_data.create_dataset()
+    atlite_capacity_factors = create_temporary_atlite_dataset()
     print("... Opened atlite capacity factor data.")
 
     # average the capacity factors according to time:
@@ -72,7 +118,7 @@ def read_wind_atlas_data_reduced():
 
     return latitude_wa,longitude_wa,values_wa
 
-
+# option 5 and 6: read in the masks single band tif files
 def read_masks_as_folium_layers():
     # Read the tiff mask files and return as folium map layers
 

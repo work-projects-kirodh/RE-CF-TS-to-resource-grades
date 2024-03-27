@@ -71,15 +71,20 @@ def average_capacity_factors_atlite():
     if not os.path.exists(os.environ.get('OPTION_1_OUTPUT_FOLDER')):
         os.makedirs(os.environ.get('OPTION_1_OUTPUT_FOLDER'))
 
+    # scale capacity factors if required:
+    if os.environ.get('SCALE_CAPACITY_FACTORS').lower() == "true":
+        tiers_raw_df = tiers_raw_df/float(os.environ.get("MAXIMUM_CAPACITY"))  # divide by the weightings
+        print("\n... Capacity factors were scaled by division of maximum capacity:",os.environ.get("MAXIMUM_CAPACITY"))
+
     tiers_raw_df.to_csv(os.path.join(os.environ.get('OPTION_1_OUTPUT_FOLDER'),os.environ.get("PERCENT_UPPER_CAPACITY_FACTORS_TIME_SERIES_FILE_1")))
     lat_lon_df.to_csv(os.path.join(os.environ.get('OPTION_1_OUTPUT_FOLDER'),os.environ.get("PERCENT_UPPER_CAPACITY_FACTORS_LOCATION_FILE_1")))
 
-    print("... Tier files for top "+os.environ.get("PERCENT_UPPER_CAPACITY_FACTORS_1")+" capacity factors created:")
+    print("\n... Tier files for top "+os.environ.get("PERCENT_UPPER_CAPACITY_FACTORS_1")+" capacity factors created:")
     print("...... Location file located in: "+os.environ.get("PERCENT_UPPER_CAPACITY_FACTORS_LOCATION_FILE_1"))
     print("...... Tier file located in: "+os.environ.get("PERCENT_UPPER_CAPACITY_FACTORS_TIME_SERIES_FILE_1"))
     print("... Note that averaged tier is in average_tier_final column.")
 
-    print("Option_1 completed successfully!")
+    print("\nOption_1 completed successfully!")
 
 
 if __name__ == '__main__':

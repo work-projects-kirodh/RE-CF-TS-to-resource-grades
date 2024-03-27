@@ -95,18 +95,23 @@ def average_capacity_factors_WAD():
         # # get the final tier and save it
         tiers_raw_df['average_tier_final'] = tiers_raw_df.mean(axis=1)
 
+        # scale capacity factors if required:
+        if os.environ.get('SCALE_CAPACITY_FACTORS').lower() == "true":
+            tiers_raw_df = tiers_raw_df / float(os.environ.get("MAXIMUM_CAPACITY"))  # divide by the weightings
+            print("\n... Capacity factors were scaled by division of maximum capacity:",os.environ.get("MAXIMUM_CAPACITY"))
+
         # save to csv files
         tiers_raw_df.to_csv(os.path.join(os.environ.get('OPTION_2_OUTPUT_FOLDER'),os.environ.get("PERCENT_UPPER_CAPACITY_FACTORS_TIME_SERIES_FILE_2")))
         lat_lon_df_wad.to_csv(os.path.join(os.environ.get('OPTION_2_OUTPUT_FOLDER'),os.environ.get("PERCENT_UPPER_CAPACITY_FACTORS_LOCATION_FILE_WAD_2")))
         lat_lon_df_atlite.to_csv(os.path.join(os.environ.get('OPTION_2_OUTPUT_FOLDER'),os.environ.get("PERCENT_UPPER_CAPACITY_FACTORS_LOCATION_FILE_ATLITE_2")))
 
-        print("... Tier files for top "+os.environ.get("PERCENT_UPPER_CAPACITY_FACTORS_2")+" capacity factors created:")
+        print("\n... Tier files for top "+os.environ.get("PERCENT_UPPER_CAPACITY_FACTORS_2")+" capacity factors created:")
         print("...... ATLITE Location file located in: "+os.environ.get("PERCENT_UPPER_CAPACITY_FACTORS_LOCATION_FILE_ATLITE_2"))
         print("...... WIND ATLAS DATA Location file located in: "+os.environ.get("PERCENT_UPPER_CAPACITY_FACTORS_LOCATION_FILE_WAD_2"))
         print("...... Tier file located in: "+os.environ.get("PERCENT_UPPER_CAPACITY_FACTORS_TIME_SERIES_FILE_2"))
         print("... Note that averaged tier is in average_tier_final column.")
 
-        print("Option_2 completed successfully!")
+        print("\nOption_2 completed successfully!")
 
 
 if __name__ == '__main__':

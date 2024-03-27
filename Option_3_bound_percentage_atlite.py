@@ -118,10 +118,16 @@ def average_capacity_factors_atlite():
         os.makedirs(os.environ.get('OPTION_3_OUTPUT_FOLDER'))
 
 
+    # scale capacity factors if required:
+    if os.environ.get('SCALE_CAPACITY_FACTORS').lower() == "true":
+        tier_dataframe_option_3 = tier_dataframe_option_3/float(os.environ.get("MAXIMUM_CAPACITY"))  # divide by the weightings
+        print("\n... Capacity factors were scaled by division of maximum capacity:",os.environ.get("MAXIMUM_CAPACITY"))
+
+
     tier_dataframe_option_3.to_csv(os.path.join(os.environ.get('OPTION_3_OUTPUT_FOLDER'),os.environ.get("BOUND_CAPACITY_FACTORS_TIME_SERIES_FILE_3")),index=False)
 
 
-    print("Option_3 completed successfully!")
+    print("\nOption_3 completed successfully!")
 
 if __name__ == '__main__':
 

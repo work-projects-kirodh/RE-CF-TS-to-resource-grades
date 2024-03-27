@@ -5,7 +5,6 @@ Author: Kirodh Boodhraj
 """
 import numpy as np
 import os
-import temporary_data as temp_data
 from dotenv import load_dotenv
 import copy
 import pandas as pd
@@ -195,15 +194,19 @@ def average_bounded_capacity_factors_WAD():
     if not os.path.exists(os.environ.get('OPTION_4_OUTPUT_FOLDER')):
         os.makedirs(os.environ.get('OPTION_4_OUTPUT_FOLDER'))
 
+    # scale capacity factors if required:
+    if os.environ.get('SCALE_CAPACITY_FACTORS').lower() == "true":
+        tier_dataframe = tier_dataframe / float(os.environ.get("MAXIMUM_CAPACITY"))  # divide by the weightings
+        print("\n... Capacity factors were scaled by division of maximum capacity:",os.environ.get("MAXIMUM_CAPACITY"))
+
     tier_dataframe.to_csv(os.path.join(os.environ.get('OPTION_4_OUTPUT_FOLDER'),os.environ.get("BOUND_CAPACITY_FACTORS_TIME_SERIES_FILE_4")),index=False)
 
-    print("... Tier files for bounds capacity factors created:")
+    print("\n... Tier files for bounds capacity factors created:")
     print("...... Tier file located in: " + os.path.join(os.environ.get('OPTION_4_OUTPUT_FOLDER'),os.environ.get("BOUND_CAPACITY_FACTORS_TIME_SERIES_FILE_4")))
     print("... Note that there are only 5 tiers for this option.")
-    print("...")
 
 
-    print("Option_4 completed successfully!")
+    print("\nOption_4 completed successfully!")
 
 if __name__ == '__main__':
 
