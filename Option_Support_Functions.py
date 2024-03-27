@@ -11,25 +11,28 @@ from dotenv import load_dotenv
 import rasterio
 import folium
 
+from branca.colormap import linear
+
+
 # Load variables from the .env file
 load_dotenv()
 
 
 # Atlite data temporary data functions
 # Function to generate random data
-def generate_random_data(latitudes, longitudes):
-    maximum_capacity = os.environ.get("MAXIMUM_CAPACITY") # MW
+def generate_random_data(latitudes, longitudes,MAXIMUM_CAPACITY):
+    maximum_capacity = MAXIMUM_CAPACITY # MW
     return np.random.rand(len(latitudes), len(longitudes)),maximum_capacity
 
-def create_temporary_atlite_dataset():
+def create_temporary_atlite_dataset(DUMMY_START_DATE,DUMMY_END_DATE,DUMMY_LATITUDE_BOTTOM,DUMMY_LATITUDE_TOP,DUMMY_LONGITUDE_LEFT,DUMMY_LONGITUDE_RIGHT,MAXIMUM_CAPACITY,DATA_VARIABLE_NAME):
     # Step 1: Create hourly date times in a Pandas series
-    hourly_date_times = pd.date_range(start=os.environ.get("DUMMY_START_DATE"), end=os.environ.get("DUMMY_END_DATE"), freq='H')
+    hourly_date_times = pd.date_range(start=DUMMY_START_DATE, end=DUMMY_END_DATE, freq='H')
 
 
     """ temporary fix start """
     # Step 2: Create equally spaced intervals of 0.1 degrees between latitudes and longitudes
-    latitude_intervals = np.arange(float(os.environ.get("DUMMY_LATITUDE_BOTTOM")), float(os.environ.get("DUMMY_LATITUDE_TOP")), 0.1)
-    longitude_intervals = np.arange(float(os.environ.get("DUMMY_LONGITUDE_LEFT")), float(os.environ.get("DUMMY_LONGITUDE_RIGHT")), 0.1)
+    latitude_intervals = np.arange(float(DUMMY_LATITUDE_BOTTOM), float(DUMMY_LATITUDE_TOP), 0.1)
+    longitude_intervals = np.arange(float(DUMMY_LONGITUDE_LEFT), float(DUMMY_LONGITUDE_RIGHT), 0.1)
 
     # Step 3: Create an empty Xarray dataset
     atlite_capacity_factors = xr.Dataset(
@@ -50,8 +53,8 @@ def create_temporary_atlite_dataset():
         #### Step 1:
         # TODO: Link to Nicolene's algorithm here
         """ temporary fix """
-        capacity_factors, maximum_capacity = generate_random_data(latitude_intervals, longitude_intervals)
-        atlite_capacity_factors[os.environ.get('DATA_VARIABLE_NAME')][i, :, :] = capacity_factors
+        capacity_factors, maximum_capacity = generate_random_data(latitude_intervals, longitude_intervals,MAXIMUM_CAPACITY)
+        atlite_capacity_factors[DATA_VARIABLE_NAME][i, :, :] = capacity_factors
         """ temporary fix """
 
     # print(atlite_capacity_factors["latitude"],atlite_capacity_factors["longitude"])
@@ -60,29 +63,32 @@ def create_temporary_atlite_dataset():
 
 
 # Atlite data
-def create_average_capacity_factor_file_atlite():
+def create_average_capacity_factor_file_atlite(ATLITE_DUMMY_DATA,DUMMY_START_DATE,DUMMY_END_DATE,DUMMY_LATITUDE_BOTTOM,DUMMY_LATITUDE_TOP,DUMMY_LONGITUDE_LEFT,DUMMY_LONGITUDE_RIGHT,MAXIMUM_CAPACITY,DATA_VARIABLE_NAME,TIME_VARIABLE_NAME,AVG_ATLITE_CAPACITY_FACTORS_FILE_LOCATION):
     # TODO: read in the capacity factors after running WP3 codes:
-    # xr.open_dataset(os.environ.get('ATLITE_CAPACITY_FACTORS_FILE_LOCATION'))
-    ## use temp data for now:
-    atlite_capacity_factors = create_temporary_atlite_dataset()
-    print("... Opened atlite capacity factor data.")
+
+    if ATLITE_DUMMY_DATA.lower() == 'true':
+        ## use temp data for now:
+        atlite_capacity_factors = create_temporary_atlite_dataset(DUMMY_START_DATE,DUMMY_END_DATE,DUMMY_LATITUDE_BOTTOM,DUMMY_LATITUDE_TOP,DUMMY_LONGITUDE_LEFT,DUMMY_LONGITUDE_RIGHT,MAXIMUM_CAPACITY,DATA_VARIABLE_NAME)
+        print("... Opened DUMMY atlite capacity factor data.")
+    else:
+        ## use temp data for now:
+        atlite_capacity_factors = create_temporary_atlite_dataset(DUMMY_START_DATE,DUMMY_END_DATE,DUMMY_LATITUDE_BOTTOM,DUMMY_LATITUDE_TOP,DUMMY_LONGITUDE_LEFT,DUMMY_LONGITUDE_RIGHT,MAXIMUM_CAPACITY,DATA_VARIABLE_NAME)
+        print("... Opened atlite capacity factor data.")
 
     # average the capacity factors according to time:
-    atlite_capacity_factors_avg = atlite_capacity_factors[os.environ.get("DATA_VARIABLE_NAME")].mean(dim=os.environ.get("TIME_VARIABLE_NAME"))
+    atlite_capacity_factors_avg = atlite_capacity_factors[DATA_VARIABLE_NAME].mean(dim=TIME_VARIABLE_NAME)
     print("... Averaged atlite capacity factor data.")
 
     # save file to assets folder:
-    atlite_capacity_factors_avg.to_netcdf(os.environ.get("AVG_ATLITE_CAPACITY_FACTORS_FILE_LOCATION"))
+    atlite_capacity_factors_avg.to_netcdf(AVG_ATLITE_CAPACITY_FACTORS_FILE_LOCATION)
     print("... Saved average atlite capacity factor data.")
 
     return atlite_capacity_factors, atlite_capacity_factors_avg
 
 
-def read_wind_atlas_data_full():
-    # get down scaling resolution of wind atlas netcdf i.e. number of points to skip for lat lon values in array, to make things render faster
-    wind_atlas_resolution_reduction = int(os.environ.get("WIND_ATLAS_RESOLUTION_REDUCTION"))
+def read_wind_atlas_data_full(WIND_ATLAS_CAPACITY_FACTORS_HEATMAP_FILE_LOCATION,WIND_ATLAS_HEATMAP_LATITUDE_VARIABLE_NAME,WIND_ATLAS_HEATMAP_LONGITUDE_VARIABLE_NAME,WIND_ATLAS_HEATMAP_DATA_VARIABLE_NAME):
     # open wind atlas netcdf
-    wind_atlas_netcdf = xr.open_dataset(os.environ.get("WIND_ATLAS_CAPACITY_FACTORS_HEATMAP_FILE_LOCATION"))
+    wind_atlas_netcdf = xr.open_dataset(WIND_ATLAS_CAPACITY_FACTORS_HEATMAP_FILE_LOCATION)
 
     # # Select every wind_atlas_resolution_reduction latitude and longitude along with capacity_factor
     # capacity_factor_subset = wind_atlas_netcdf.sel(
@@ -90,19 +96,19 @@ def read_wind_atlas_data_full():
     #     lon=wind_atlas_netcdf.lon.values[::wind_atlas_resolution_reduction])
 
     # Access the capacity_factor variable from the subset
-    latitude_wa = wind_atlas_netcdf[os.environ.get("WIND_ATLAS_HEATMAP_LATITUDE_VARIABLE_NAME")].values.astype(float)
-    longitude_wa = wind_atlas_netcdf[os.environ.get("WIND_ATLAS_HEATMAP_LONGITUDE_VARIABLE_NAME")].values.astype(float)
-    all_data_wa = wind_atlas_netcdf[os.environ.get("WIND_ATLAS_HEATMAP_DATA_VARIABLE_NAME")] #.values.astype(float)
+    latitude_wa = wind_atlas_netcdf[WIND_ATLAS_HEATMAP_LATITUDE_VARIABLE_NAME].values.astype(float)
+    longitude_wa = wind_atlas_netcdf[WIND_ATLAS_HEATMAP_LONGITUDE_VARIABLE_NAME].values.astype(float)
+    all_data_wa = wind_atlas_netcdf[WIND_ATLAS_HEATMAP_DATA_VARIABLE_NAME] #.values.astype(float)
     # all_data_wa[np.isnan(all_data_wa)] = 0.0  # Replace NaN with 0.0, you can choose a different value if needed
     # lon_wa, lat_wa = np.meshgrid(longitude_wa, latitude_wa)
     return latitude_wa,longitude_wa,all_data_wa
 
 
-def read_wind_atlas_data_reduced():
+def read_wind_atlas_data_reduced(WIND_ATLAS_RESOLUTION_REDUCTION,WIND_ATLAS_CAPACITY_FACTORS_HEATMAP_FILE_LOCATION,WIND_ATLAS_HEATMAP_LATITUDE_VARIABLE_NAME,WIND_ATLAS_HEATMAP_LONGITUDE_VARIABLE_NAME,WIND_ATLAS_HEATMAP_DATA_VARIABLE_NAME):
     # get down scaling resolution of wind atlas netcdf i.e. number of points to skip for lat lon values in array, to make things render faster
-    wind_atlas_resolution_reduction = int(os.environ.get("WIND_ATLAS_RESOLUTION_REDUCTION"))
+    wind_atlas_resolution_reduction = int(WIND_ATLAS_RESOLUTION_REDUCTION)
     # open wind atlas netcdf
-    wind_atlas_netcdf = xr.open_dataset(os.environ.get("WIND_ATLAS_CAPACITY_FACTORS_HEATMAP_FILE_LOCATION"))
+    wind_atlas_netcdf = xr.open_dataset(WIND_ATLAS_CAPACITY_FACTORS_HEATMAP_FILE_LOCATION)
 
     # Select every wind_atlas_resolution_reduction latitude and longitude along with capacity_factor
     capacity_factor_subset = wind_atlas_netcdf.sel(
@@ -110,20 +116,20 @@ def read_wind_atlas_data_reduced():
         lon=wind_atlas_netcdf.lon.values[::wind_atlas_resolution_reduction])
 
     # Access the capacity_factor variable from the subset
-    latitude_wa = capacity_factor_subset[os.environ.get("WIND_ATLAS_HEATMAP_LATITUDE_VARIABLE_NAME")].values.astype(float)
-    longitude_wa = capacity_factor_subset[os.environ.get("WIND_ATLAS_HEATMAP_LONGITUDE_VARIABLE_NAME")].values.astype(float)
-    values_wa = capacity_factor_subset[os.environ.get("WIND_ATLAS_HEATMAP_DATA_VARIABLE_NAME")] #.values.astype(float)
+    latitude_wa = capacity_factor_subset[WIND_ATLAS_HEATMAP_LATITUDE_VARIABLE_NAME].values.astype(float)
+    longitude_wa = capacity_factor_subset[WIND_ATLAS_HEATMAP_LONGITUDE_VARIABLE_NAME].values.astype(float)
+    values_wa = capacity_factor_subset[WIND_ATLAS_HEATMAP_DATA_VARIABLE_NAME] #.values.astype(float)
     # values_wa[np.isnan(values_wa)] = 0.0  # Replace NaN with 0.0, you can choose a different value if needed
     # lon_wa, lat_wa = np.meshgrid(longitude_wa, latitude_wa)
 
     return latitude_wa,longitude_wa,values_wa
 
 # option 5 and 6: read in the masks single band tif files
-def read_masks_as_folium_layers():
+def read_masks_as_folium_layers(MASKS_FOLDER):
     # Read the tiff mask files and return as folium map layers
 
     # Path to your TIFF folder
-    tiff_folder_path = os.environ.get("MASKS_FOLDER")
+    tiff_folder_path = MASKS_FOLDER
 
     # List all files in the folder
     tif_files = [f for f in os.listdir(tiff_folder_path) if f.endswith('.tif')]
@@ -182,6 +188,8 @@ def read_masks_as_folium_layers():
         # step 2: create layer
         # Create a colormap
         colormap = 'YlGnBu'  # Example, you can change it to any colormap available in matplotlib
+        colormap = linear.YlGnBu_09.scale(np.min(tiff_data), np.max(tiff_data))
+        colormap.caption = 'Values'
 
         # Add the TIFF layer to the map
         wind_atlas_tiff_overlay = folium.raster_layers.ImageOverlay(
@@ -194,9 +202,10 @@ def read_masks_as_folium_layers():
         )
         # step 3: add layer to layer group
         wind_atlas_tiff_overlay.add_to(masks_layer_group)
+
+
         # step 4: append this layer to a list for returning
         final_layers.append(masks_layer_group)
-
 
     return final_layers
 

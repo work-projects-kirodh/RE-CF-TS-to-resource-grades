@@ -18,7 +18,7 @@ load_dotenv()
 
 def average_capacity_factors_atlite():
     # average the capacity factors according to time:
-    atlite_capacity_factors, atlite_capacity_factors_avg = support_functions.create_average_capacity_factor_file_atlite()
+    atlite_capacity_factors, atlite_capacity_factors_avg = support_functions.create_average_capacity_factor_file_atlite(os.environ.get('ATLITE_DUMMY_DATA'),os.environ.get("DUMMY_START_DATE"),os.environ.get("DUMMY_END_DATE"),os.environ.get("DUMMY_LATITUDE_BOTTOM"),os.environ.get("DUMMY_LATITUDE_TOP"),os.environ.get("DUMMY_LONGITUDE_LEFT"),os.environ.get("DUMMY_LONGITUDE_RIGHT"),os.environ.get("MAXIMUM_CAPACITY"),os.environ.get("DATA_VARIABLE_NAME"),os.environ.get("TIME_VARIABLE_NAME"),os.environ.get("AVG_ATLITE_CAPACITY_FACTORS_FILE_LOCATION"))
     print("... Averaged atlite capacity factor data.")
 
 

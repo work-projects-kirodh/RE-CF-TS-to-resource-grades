@@ -278,7 +278,7 @@ def option_5_process_geometries_into_tiers():
     ## open atlite capacity factor data
     ########################################################################
     # open the averaged atlite capacity factor data
-    atlite_capacity_factors, atlite_capacity_factors_avg = support_functions.create_average_capacity_factor_file_atlite()
+    atlite_capacity_factors, atlite_capacity_factors_avg = support_functions.create_average_capacity_factor_file_atlite(os.environ.get('ATLITE_DUMMY_DATA'),os.environ.get("DUMMY_START_DATE"),os.environ.get("DUMMY_END_DATE"),os.environ.get("DUMMY_LATITUDE_BOTTOM"),os.environ.get("DUMMY_LATITUDE_TOP"),os.environ.get("DUMMY_LONGITUDE_LEFT"),os.environ.get("DUMMY_LONGITUDE_RIGHT"),os.environ.get("MAXIMUM_CAPACITY"),os.environ.get("DATA_VARIABLE_NAME"),os.environ.get("TIME_VARIABLE_NAME"),os.environ.get("AVG_ATLITE_CAPACITY_FACTORS_FILE_LOCATION"))
     print("... Read averaged atlite capacity factor data.\n")
 
     # Call the function to check if each geometry is within the bounds

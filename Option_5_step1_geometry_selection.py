@@ -27,7 +27,7 @@ app = dash.Dash(__name__)
 ## open atlite capacity factor data
 ########################################################################
 # open the averaged atlite capacity factor data
-atlite_capacity_factors, atlite_capacity_factors_avg = support_functions.create_average_capacity_factor_file_atlite()
+atlite_capacity_factors, atlite_capacity_factors_avg = support_functions.create_average_capacity_factor_file_atlite(os.environ.get('ATLITE_DUMMY_DATA'),os.environ.get("DUMMY_START_DATE"),os.environ.get("DUMMY_END_DATE"),os.environ.get("DUMMY_LATITUDE_BOTTOM"),os.environ.get("DUMMY_LATITUDE_TOP"),os.environ.get("DUMMY_LONGITUDE_LEFT"),os.environ.get("DUMMY_LONGITUDE_RIGHT"),os.environ.get("MAXIMUM_CAPACITY"),os.environ.get("DATA_VARIABLE_NAME"),os.environ.get("TIME_VARIABLE_NAME"),os.environ.get("AVG_ATLITE_CAPACITY_FACTORS_FILE_LOCATION"))
 print("... Read averaged atlite capacity factor data.")
 
 
@@ -145,7 +145,7 @@ plugins.HeatMap(data_wa, name='atlas',opacity=0.3).add_to(wind_atlas_layer_heatm
 ## Mask layers
 ########################################################################
 # add the mask layers to the map
-mask_layers = support_functions.read_masks_as_folium_layers()
+mask_layers = support_functions.read_masks_as_folium_layers(os.environ.get("MASKS_FOLDER"))
 
 
 
