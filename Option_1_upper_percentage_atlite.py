@@ -30,6 +30,8 @@ def parse_arguments():
     parser.add_argument('--DATA_VARIABLE_NAME', default=None, required=False, help="Data variable name.")
     parser.add_argument('--TIME_VARIABLE_NAME', default=None, required=False, help="Time variable name.")
     parser.add_argument('--AVG_ATLITE_CAPACITY_FACTORS_FILE_LOCATION', default=None, required=False,help="Average ATLITE capacity factors file location.")
+    parser.add_argument('--AVG_ATLITE_LATITUDE_VARIABLE_NAME', default=None, required=False,help="Average ATLITE latitude variable name.")
+    parser.add_argument('--AVG_ATLITE_LONGITUDE_VARIABLE_NAME', default=None, required=False,help="Average ATLITE longitude variable name.")
     parser.add_argument('--PERCENT_UPPER_CAPACITY_FACTORS_1', default=None, required=False,help="Percentage upper capacity factors 1.")
     parser.add_argument('--OPTION_1_OUTPUT_FOLDER', default=None, required=False, help="Option 1 output folder.")
     parser.add_argument('--PERCENT_UPPER_CAPACITY_FACTORS_TIME_SERIES_FILE_1', default=None, required=False,help="Percentage upper capacity factors time series file 1.")
@@ -65,6 +67,8 @@ def load_from_env():
         "DATA_VARIABLE_NAME" : os.environ.get("DATA_VARIABLE_NAME"),
         "TIME_VARIABLE_NAME" : os.environ.get("TIME_VARIABLE_NAME"),
         "AVG_ATLITE_CAPACITY_FACTORS_FILE_LOCATION" : os.environ.get("AVG_ATLITE_CAPACITY_FACTORS_FILE_LOCATION"),
+        "AVG_ATLITE_LATITUDE_VARIABLE_NAME" : os.environ.get("AVG_ATLITE_LATITUDE_VARIABLE_NAME"),
+        "AVG_ATLITE_LONGITUDE_VARIABLE_NAME" : os.environ.get("AVG_ATLITE_LONGITUDE_VARIABLE_NAME"),
         "PERCENT_UPPER_CAPACITY_FACTORS_1" : os.environ.get("PERCENT_UPPER_CAPACITY_FACTORS_1"),
         "OPTION_1_OUTPUT_FOLDER" : os.environ.get("OPTION_1_OUTPUT_FOLDER"),
         "PERCENT_UPPER_CAPACITY_FACTORS_TIME_SERIES_FILE_1" : os.environ.get("PERCENT_UPPER_CAPACITY_FACTORS_TIME_SERIES_FILE_1"),
@@ -85,12 +89,15 @@ def load_from_env():
     if unset_variables:
         print("WARNING: The following environment variables are not set in the .env file:")
         for var in unset_variables:
-            print("...... -  ",var)
+            print("...... -  ", var)
 
     return env_vars
 
 
-def average_capacity_factors_atlite(ATLITE_DUMMY_DATA, DUMMY_START_DATE, DUMMY_END_DATE, DUMMY_LATITUDE_BOTTOM, DUMMY_LATITUDE_TOP, DUMMY_LONGITUDE_LEFT, DUMMY_LONGITUDE_RIGHT, MAXIMUM_CAPACITY, DATA_VARIABLE_NAME, TIME_VARIABLE_NAME, AVG_ATLITE_CAPACITY_FACTORS_FILE_LOCATION, PERCENT_UPPER_CAPACITY_FACTORS_1, OPTION_1_OUTPUT_FOLDER, PERCENT_UPPER_CAPACITY_FACTORS_TIME_SERIES_FILE_1, PERCENT_UPPER_CAPACITY_FACTORS_LOCATION_FILE_1, SCALE_CAPACITY_FACTORS):
+################################################################
+# main codes:
+
+def average_capacity_factors_atlite(ATLITE_DUMMY_DATA, DUMMY_START_DATE, DUMMY_END_DATE, DUMMY_LATITUDE_BOTTOM, DUMMY_LATITUDE_TOP, DUMMY_LONGITUDE_LEFT, DUMMY_LONGITUDE_RIGHT, MAXIMUM_CAPACITY, DATA_VARIABLE_NAME, TIME_VARIABLE_NAME, AVG_ATLITE_CAPACITY_FACTORS_FILE_LOCATION, AVG_ATLITE_LATITUDE_VARIABLE_NAME, AVG_ATLITE_LONGITUDE_VARIABLE_NAME, PERCENT_UPPER_CAPACITY_FACTORS_1, OPTION_1_OUTPUT_FOLDER, PERCENT_UPPER_CAPACITY_FACTORS_TIME_SERIES_FILE_1, PERCENT_UPPER_CAPACITY_FACTORS_LOCATION_FILE_1, SCALE_CAPACITY_FACTORS):
     # average the capacity factors according to time:
     atlite_capacity_factors, atlite_capacity_factors_avg = support_functions.create_average_capacity_factor_file_atlite(ATLITE_DUMMY_DATA,DUMMY_START_DATE,DUMMY_END_DATE,DUMMY_LATITUDE_BOTTOM,DUMMY_LATITUDE_TOP,DUMMY_LONGITUDE_LEFT,DUMMY_LONGITUDE_RIGHT,MAXIMUM_CAPACITY,DATA_VARIABLE_NAME,TIME_VARIABLE_NAME,AVG_ATLITE_CAPACITY_FACTORS_FILE_LOCATION)
     print("... Read averaged atlite capacity factor data.")
@@ -106,15 +113,15 @@ def average_capacity_factors_atlite(ATLITE_DUMMY_DATA, DUMMY_START_DATE, DUMMY_E
     except Exception as e:
         ValueError("The percentage is not a number. Only 0-100 allowed.")
     # Find the top % values from the temporal average
-    top_percentage = copy.deepcopy(atlite_capacity_factors_avg).stack(z=(os.environ.get("AVG_ATLITE_LATITUDE_VARIABLE_NAME"), os.environ.get("AVG_ATLITE_LONGITUDE_VARIABLE_NAME"))).quantile(1.0 - float(PERCENT_UPPER_CAPACITY_FACTORS_1)/100)
+    top_percentage = copy.deepcopy(atlite_capacity_factors_avg).stack(z=(AVG_ATLITE_LATITUDE_VARIABLE_NAME, AVG_ATLITE_LONGITUDE_VARIABLE_NAME)).quantile(1.0 - float(PERCENT_UPPER_CAPACITY_FACTORS_1)/100)
 
 
     # Use boolean indexing to select the desired indexes
     selected_indexes = atlite_capacity_factors_avg.where(atlite_capacity_factors_avg>top_percentage)#, drop=True)
 
     # get lats/lons
-    latitudes = selected_indexes[os.environ.get(("AVG_ATLITE_LATITUDE_VARIABLE_NAME"))].values
-    longitudes = selected_indexes[os.environ.get(("AVG_ATLITE_LONGITUDE_VARIABLE_NAME"))].values
+    latitudes = selected_indexes[AVG_ATLITE_LATITUDE_VARIABLE_NAME].values
+    longitudes = selected_indexes[AVG_ATLITE_LONGITUDE_VARIABLE_NAME].values
 
     # empty shell to store the lats/lons and the data, then average them later
     lat_lon_df = pd.DataFrame(columns=['latitude', 'longitude','average_capacity_factor'])
@@ -189,4 +196,4 @@ if __name__ == '__main__':
 
 
     # args example use:
-    # python Option_1_upper_percentage_atlite --ATLITE_DUMMY_DATA True  --DUMMY_START_DATE  '2023-01-01' --DUMMY_END_DATE '2024-01-01'  --DUMMY_LATITUDE_BOTTOM  -32 --DUMMY_LATITUDE_TOP -30  --DUMMY_LONGITUDE_LEFT 26  --DUMMY_LONGITUDE_RIGHT 28   --MAXIMUM_CAPACITY  50  --DATA_VARIABLE_NAME capacity_factors  --TIME_VARIABLE_NAME  time  --AVG_ATLITE_CAPACITY_FACTORS_FILE_LOCATION "assets/avg_atlite_capacity_factors.nc"  --PERCENT_UPPER_CAPACITY_FACTORS_1 10  --OPTION_1_OUTPUT_FOLDER  "assets/option_1_output"  --PERCENT_UPPER_CAPACITY_FACTORS_TIME_SERIES_FILE_1  "option_1_top_percentage_capacity_factor_time_series.csv"  --PERCENT_UPPER_CAPACITY_FACTORS_LOCATION_FILE_1  "option_1_top_percentage_locations.csv"  --SCALE_CAPACITY_FACTORS True
+    # python Option_1_upper_percentage_atlite.py --ATLITE_DUMMY_DATA True  --DUMMY_START_DATE  '2023-01-01' --DUMMY_END_DATE '2024-01-01'  --DUMMY_LATITUDE_BOTTOM  -32 --DUMMY_LATITUDE_TOP -30  --DUMMY_LONGITUDE_LEFT 26  --DUMMY_LONGITUDE_RIGHT 28   --MAXIMUM_CAPACITY  50  --DATA_VARIABLE_NAME capacity_factors  --TIME_VARIABLE_NAME  time  --AVG_ATLITE_CAPACITY_FACTORS_FILE_LOCATION "assets/avg_atlite_capacity_factors.nc" --AVG_ATLITE_LATITUDE_VARIABLE_NAME latitude --AVG_ATLITE_LONGITUDE_VARIABLE_NAME longitude --PERCENT_UPPER_CAPACITY_FACTORS_1 10  --OPTION_1_OUTPUT_FOLDER  "assets/option_1_output"  --PERCENT_UPPER_CAPACITY_FACTORS_TIME_SERIES_FILE_1  "option_1_top_percentage_capacity_factor_time_series.csv"  --PERCENT_UPPER_CAPACITY_FACTORS_LOCATION_FILE_1  "option_1_top_percentage_locations.csv"  --SCALE_CAPACITY_FACTORS True
