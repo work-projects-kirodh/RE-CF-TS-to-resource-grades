@@ -445,6 +445,6 @@ def option_5_process_geometries_into_tiers():
         print("\nNo visualization selected. If you want to visualize thedata set the OPTION_5_VIEW_VALID_GEOMETRIES to true.")
 
 if __name__ == '__main__':
-    print("Starting tier processing forOption 5: single tier per user defined geometry ...")
+    print("Starting tier processing for Option 5: single tier per user defined geometry ...")
     option_5_process_geometries_into_tiers()
 
