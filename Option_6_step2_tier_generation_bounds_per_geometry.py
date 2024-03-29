@@ -28,7 +28,14 @@ def parse_arguments():
     parser.add_argument('--AVG_ATLITE_LONGITUDE_VARIABLE_NAME', default=None, required=False,help="Average ATLITE longitude variable name.")
     parser.add_argument('--AVG_ATLITE_LATITUDE_VARIABLE_NAME', default=None, required=False,help="Average ATLITE latitude variable name.")
     parser.add_argument('--AVG_ATLITE_DATA_VARIABLE_NAME', default=None, required=False,help="Average ATLITE data variable name.")
-    parser.add_argument('--OPTION_5_USER_GEOMETRIES_GEOJSON_FILE', default=None, required=False,help="User defined geometries as output from Step 1.")
+    parser.add_argument('--PERCENT_UPPER_TIER1_CAPACITY_FACTORS', default=None, required=False,help="User defined % bounds for capacuty factors for tier 1.")
+    parser.add_argument('--PERCENT_UPPER_TIER2_CAPACITY_FACTORS', default=None, required=False,help="User defined % bounds for capacuty factors for tier 2.")
+    parser.add_argument('--PERCENT_UPPER_TIER3_CAPACITY_FACTORS', default=None, required=False,help="User defined % bounds for capacuty factors for tier 3.")
+    parser.add_argument('--PERCENT_UPPER_TIER4_CAPACITY_FACTORS', default=None, required=False,help="User defined % bounds for capacuty factors for tier 4.")
+    parser.add_argument('--PERCENT_UPPER_TIER5_CAPACITY_FACTORS', default=None, required=False,help="User defined % bounds for capacuty factors for tier 5.")
+    parser.add_argument('--DATA_VARIABLE_NAME', default=None, required=False, help="Data variable name.")
+    parser.add_argument('--OPTION_6_USER_GEOMETRIES_GEOJSON_FILE', default=None, required=False,help="User defined geometries as output from Step 1.")
+    parser.add_argument('--OPTION_6_OUTPUT_FOLDER', default=None, required=False, help="Option 6 output folder.")
     parser.add_argument('--ATLITE_DUMMY_DATA', default=None, required=False, help="Boolean to use the dummy Atlite data (True) or not.")
     parser.add_argument('--DUMMY_START_DATE', default=None, required=False, help="Start date.")
     parser.add_argument('--DUMMY_END_DATE', default=None, required=False, help="End date.")
@@ -37,14 +44,12 @@ def parse_arguments():
     parser.add_argument('--DUMMY_LONGITUDE_LEFT', default=None, required=False, help="Longitude left.")
     parser.add_argument('--DUMMY_LONGITUDE_RIGHT', default=None, required=False, help="Longitude right.")
     parser.add_argument('--MAXIMUM_CAPACITY', default=None, required=False, help="Maximum capacity.")
-    parser.add_argument('--DATA_VARIABLE_NAME', default=None, required=False, help="Data variable name.")
     parser.add_argument('--TIME_VARIABLE_NAME', default=None, required=False, help="Time variable name.")
     parser.add_argument('--AVG_ATLITE_CAPACITY_FACTORS_FILE_LOCATION', default=None, required=False,help="Average ATLITE capacity factors file location.")
-    parser.add_argument('--OPTION_5_OUTPUT_FOLDER', default=None, required=False, help="Option 5 output folder.")
     parser.add_argument('--SCALE_CAPACITY_FACTORS', default=None, required=False, help="Scale capacity factors.")
-    parser.add_argument('--OPTION_5_OUTPUT_TIERS_FILE', default=None, required=False,help="Output tiers file.")
-    parser.add_argument('--OPTION_5_GEOMETRY_REFERENCE_FILE', default=None, required=False,help="Output geometry reference file.")
-    parser.add_argument('--OPTION_5_VIEW_VALID_GEOMETRIES', default=None, required=False,help="View geometryTrue or not False.")
+    parser.add_argument('--OPTION_6_OUTPUT_TIERS_FILE', default=None, required=False,help="Output tiers file.")
+    parser.add_argument('--OPTION_6_GEOMETRY_REFERENCE_FILE', default=None, required=False,help="Output geometry reference file.")
+    parser.add_argument('--OPTION_6_VIEW_VALID_GEOMETRIES', default=None, required=False,help="View geometryTrue or not False.")
 
     # parse args
     args = parser.parse_args()
@@ -67,7 +72,14 @@ def load_from_env():
         "AVG_ATLITE_LONGITUDE_VARIABLE_NAME" : os.environ.get("AVG_ATLITE_LONGITUDE_VARIABLE_NAME"),
         "AVG_ATLITE_LATITUDE_VARIABLE_NAME" : os.environ.get("AVG_ATLITE_LATITUDE_VARIABLE_NAME"),
         "AVG_ATLITE_DATA_VARIABLE_NAME" : os.environ.get("AVG_ATLITE_DATA_VARIABLE_NAME"),
-        "OPTION_5_USER_GEOMETRIES_GEOJSON_FILE" : os.environ.get("OPTION_5_USER_GEOMETRIES_GEOJSON_FILE"),
+        "PERCENT_UPPER_TIER1_CAPACITY_FACTORS" : os.environ.get("PERCENT_UPPER_TIER1_CAPACITY_FACTORS"),
+        "PERCENT_UPPER_TIER2_CAPACITY_FACTORS" : os.environ.get("PERCENT_UPPER_TIER2_CAPACITY_FACTORS"),
+        "PERCENT_UPPER_TIER3_CAPACITY_FACTORS" : os.environ.get("PERCENT_UPPER_TIER3_CAPACITY_FACTORS"),
+        "PERCENT_UPPER_TIER4_CAPACITY_FACTORS" : os.environ.get("PERCENT_UPPER_TIER4_CAPACITY_FACTORS"),
+        "PERCENT_UPPER_TIER5_CAPACITY_FACTORS" : os.environ.get("PERCENT_UPPER_TIER5_CAPACITY_FACTORS"),
+        "DATA_VARIABLE_NAME" : os.environ.get("DATA_VARIABLE_NAME"),
+        "OPTION_6_USER_GEOMETRIES_GEOJSON_FILE" : os.environ.get("OPTION_6_USER_GEOMETRIES_GEOJSON_FILE"),
+        "OPTION_6_OUTPUT_FOLDER" : os.environ.get("OPTION_6_OUTPUT_FOLDER"),
         "ATLITE_DUMMY_DATA" : os.environ.get("ATLITE_DUMMY_DATA"),
         "DUMMY_START_DATE" : os.environ.get("DUMMY_START_DATE"),
         "DUMMY_END_DATE" : os.environ.get("DUMMY_END_DATE"),
@@ -76,14 +88,12 @@ def load_from_env():
         "DUMMY_LONGITUDE_LEFT" : os.environ.get("DUMMY_LONGITUDE_LEFT"),
         "DUMMY_LONGITUDE_RIGHT" : os.environ.get("DUMMY_LONGITUDE_RIGHT"),
         "MAXIMUM_CAPACITY" : os.environ.get("MAXIMUM_CAPACITY"),
-        "DATA_VARIABLE_NAME" : os.environ.get("DATA_VARIABLE_NAME"),
         "TIME_VARIABLE_NAME" : os.environ.get("TIME_VARIABLE_NAME"),
         "AVG_ATLITE_CAPACITY_FACTORS_FILE_LOCATION" : os.environ.get("AVG_ATLITE_CAPACITY_FACTORS_FILE_LOCATION"),
-        "OPTION_5_OUTPUT_FOLDER" : os.environ.get("OPTION_5_OUTPUT_FOLDER"),
         "SCALE_CAPACITY_FACTORS" : os.environ.get("SCALE_CAPACITY_FACTORS"),
-        "OPTION_5_OUTPUT_TIERS_FILE" : os.environ.get("OPTION_5_OUTPUT_TIERS_FILE"),
-        "OPTION_5_GEOMETRY_REFERENCE_FILE" : os.environ.get("OPTION_5_GEOMETRY_REFERENCE_FILE"),
-        "OPTION_5_VIEW_VALID_GEOMETRIES" : os.environ.get("OPTION_5_VIEW_VALID_GEOMETRIES"),
+        "OPTION_6_OUTPUT_TIERS_FILE" : os.environ.get("OPTION_6_OUTPUT_TIERS_FILE"),
+        "OPTION_6_GEOMETRY_REFERENCE_FILE" : os.environ.get("OPTION_6_GEOMETRY_REFERENCE_FILE"),
+        "OPTION_6_VIEW_VALID_GEOMETRIES" : os.environ.get("OPTION_6_VIEW_VALID_GEOMETRIES"),
     }
 
     # Store the names of variables that are None
@@ -108,7 +118,7 @@ def load_from_env():
 ########################################################################
 # Helper function: Check geometries, inside or outside bounding box
 ########################################################################
-def check_geojson_within_bounds(geojson_data, xarray_dataset):
+def check_geojson_within_bounds(geojson_data, xarray_dataset, AVG_ATLITE_LONGITUDE_VARIABLE_NAME, AVG_ATLITE_LATITUDE_VARIABLE_NAME):
     """
 
     :param geojson_data: The geojson data with geometries
@@ -116,7 +126,7 @@ def check_geojson_within_bounds(geojson_data, xarray_dataset):
     :return: list of geometries within and outside bounding box
     """
     # Get the bounds of the xarray dataset
-    bounds = (xarray_dataset[os.environ.get("AVG_ATLITE_LONGITUDE_VARIABLE_NAME")].min(), xarray_dataset[os.environ.get("AVG_ATLITE_LATITUDE_VARIABLE_NAME")].min(), xarray_dataset[os.environ.get("AVG_ATLITE_LONGITUDE_VARIABLE_NAME")].max(), xarray_dataset[os.environ.get("AVG_ATLITE_LATITUDE_VARIABLE_NAME")].max())
+    bounds = (xarray_dataset[AVG_ATLITE_LONGITUDE_VARIABLE_NAME].min(), xarray_dataset[AVG_ATLITE_LATITUDE_VARIABLE_NAME].min(), xarray_dataset[AVG_ATLITE_LONGITUDE_VARIABLE_NAME].max(), xarray_dataset[AVG_ATLITE_LATITUDE_VARIABLE_NAME].max())
     bounding_box = box(*bounds)
 
     print("\n... Checking if user defined geometry is within Atlite bounding box.")
@@ -156,7 +166,7 @@ def check_geojson_within_bounds(geojson_data, xarray_dataset):
 #################################################
 ## Helper function: obtain the tiers per valid geometry
 #################################################
-def calculate_valid_tiers(atlite_data,atlite_data_avg,points_geometry,geometry):
+def calculate_valid_tiers(atlite_data,atlite_data_avg,points_geometry,geometry,AVG_ATLITE_LATITUDE_VARIABLE_NAME, AVG_ATLITE_LONGITUDE_VARIABLE_NAME, AVG_ATLITE_DATA_VARIABLE_NAME, PERCENT_UPPER_TIER1_CAPACITY_FACTORS, PERCENT_UPPER_TIER2_CAPACITY_FACTORS, PERCENT_UPPER_TIER3_CAPACITY_FACTORS, PERCENT_UPPER_TIER4_CAPACITY_FACTORS, PERCENT_UPPER_TIER5_CAPACITY_FACTORS, DATA_VARIABLE_NAME):
     """
 
     :param atlite_data: Full Atlite data
@@ -170,15 +180,15 @@ def calculate_valid_tiers(atlite_data,atlite_data_avg,points_geometry,geometry):
     if geometry == "Point":
         print("... Dealing with POINT geometry")
         # Find the nearest latitude and longitude in the xarray dataset
-        lat_index = np.abs(atlite_data[os.environ.get("AVG_ATLITE_LATITUDE_VARIABLE_NAME")] - points_geometry.y).argmin().item()
-        lon_index = np.abs(atlite_data[os.environ.get("AVG_ATLITE_LONGITUDE_VARIABLE_NAME")] - points_geometry.x).argmin().item()
+        lat_index = np.abs(atlite_data[AVG_ATLITE_LATITUDE_VARIABLE_NAME] - points_geometry.y).argmin().item()
+        lon_index = np.abs(atlite_data[AVG_ATLITE_LONGITUDE_VARIABLE_NAME] - points_geometry.x).argmin().item()
 
         # # Extract the nearest latitude and longitude values
         # nearest_lat = float(atlite_data[os.environ.get("AVG_ATLITE_LATITUDE_VARIABLE_NAME")].values[lat_index])
         # nearest_lon = float(atlite_data[os.environ.get("AVG_ATLITE_LONGITUDE_VARIABLE_NAME")].values[lon_index])
 
         # Select the data at the nearest point
-        capacity_factors_at_nearest_point = atlite_data[os.environ.get("AVG_ATLITE_DATA_VARIABLE_NAME")][:,lat_index,lon_index]
+        capacity_factors_at_nearest_point = atlite_data[AVG_ATLITE_DATA_VARIABLE_NAME][:,lat_index,lon_index]
         # Create a DataFrame
         tier_dataframe_option_6_point = pd.DataFrame({
             'tier_1': capacity_factors_at_nearest_point.values,
@@ -195,11 +205,11 @@ def calculate_valid_tiers(atlite_data,atlite_data_avg,points_geometry,geometry):
         print("... Dealing with POLYGON geometry")
 
         # Convert the PERCENT_UPPER_TIER1_CAPACITY_FACTORS variable to a list of floats
-        percent_upper_tier1_capacity_factors = list(map(float, os.environ.get("PERCENT_UPPER_TIER1_CAPACITY_FACTORS").split(',')))
-        percent_upper_tier2_capacity_factors = list(map(float, os.environ.get("PERCENT_UPPER_TIER2_CAPACITY_FACTORS").split(',')))
-        percent_upper_tier3_capacity_factors = list(map(float, os.environ.get("PERCENT_UPPER_TIER3_CAPACITY_FACTORS").split(',')))
-        percent_upper_tier4_capacity_factors = list(map(float, os.environ.get("PERCENT_UPPER_TIER4_CAPACITY_FACTORS").split(',')))
-        percent_upper_tier5_capacity_factors = list(map(float, os.environ.get("PERCENT_UPPER_TIER5_CAPACITY_FACTORS").split(',')))
+        percent_upper_tier1_capacity_factors = list(map(float, PERCENT_UPPER_TIER1_CAPACITY_FACTORS.split(',')))
+        percent_upper_tier2_capacity_factors = list(map(float, PERCENT_UPPER_TIER2_CAPACITY_FACTORS.split(',')))
+        percent_upper_tier3_capacity_factors = list(map(float, PERCENT_UPPER_TIER3_CAPACITY_FACTORS.split(',')))
+        percent_upper_tier4_capacity_factors = list(map(float, PERCENT_UPPER_TIER4_CAPACITY_FACTORS.split(',')))
+        percent_upper_tier5_capacity_factors = list(map(float, PERCENT_UPPER_TIER5_CAPACITY_FACTORS.split(',')))
 
         # Find the top % values from the temporal average (sorts out user swapping max and min)
         upper_percentile_tier1 = 1.0 - min(percent_upper_tier1_capacity_factors) / 100.0
@@ -259,10 +269,10 @@ def calculate_valid_tiers(atlite_data,atlite_data_avg,points_geometry,geometry):
         subset = subset.fillna(0)
 
         # Repeat the mask along the time dimension to match the full dataset, needed for tier extraction
-        mask_time = np.repeat(mask_reshaped[np.newaxis, :, :], len(atlite_data[os.environ.get("DATA_VARIABLE_NAME")].values[:,0,0]), axis=0)
+        mask_time = np.repeat(mask_reshaped[np.newaxis, :, :], len(atlite_data[DATA_VARIABLE_NAME].values[:,0,0]), axis=0)
 
         # set points outside geometry to nan
-        subset_full_dataset[os.environ.get("DATA_VARIABLE_NAME")].values[~mask_time] = np.nan
+        subset_full_dataset[DATA_VARIABLE_NAME].values[~mask_time] = np.nan
         # dont set to 0 because the code for tier generation for each percentile checks for nan specifically
         # subset_full_dataset = subset_full_dataset.fillna(0)
 
@@ -312,11 +322,11 @@ def calculate_valid_tiers(atlite_data,atlite_data_avg,points_geometry,geometry):
         selected_indexes_tier5 = subset.where((subset > bottom_bound_tier5) & (subset < top_bound_tier5))
 
         # Generate the tiers:
-        bound_tier1 = get_tier_percentage_bound(subset[os.environ.get("AVG_ATLITE_LATITUDE_VARIABLE_NAME")].values,subset[os.environ.get("AVG_ATLITE_LONGITUDE_VARIABLE_NAME")].values,copy.deepcopy(subset_full_dataset), selected_indexes_tier1)
-        bound_tier2 = get_tier_percentage_bound(subset[os.environ.get("AVG_ATLITE_LATITUDE_VARIABLE_NAME")].values,subset[os.environ.get("AVG_ATLITE_LONGITUDE_VARIABLE_NAME")].values,copy.deepcopy(subset_full_dataset), selected_indexes_tier2)
-        bound_tier3 = get_tier_percentage_bound(subset[os.environ.get("AVG_ATLITE_LATITUDE_VARIABLE_NAME")].values,subset[os.environ.get("AVG_ATLITE_LONGITUDE_VARIABLE_NAME")].values,copy.deepcopy(subset_full_dataset), selected_indexes_tier3)
-        bound_tier4 = get_tier_percentage_bound(subset[os.environ.get("AVG_ATLITE_LATITUDE_VARIABLE_NAME")].values,subset[os.environ.get("AVG_ATLITE_LONGITUDE_VARIABLE_NAME")].values,copy.deepcopy(subset_full_dataset), selected_indexes_tier4)
-        bound_tier5 = get_tier_percentage_bound(subset[os.environ.get("AVG_ATLITE_LATITUDE_VARIABLE_NAME")].values,subset[os.environ.get("AVG_ATLITE_LONGITUDE_VARIABLE_NAME")].values,copy.deepcopy(subset_full_dataset), selected_indexes_tier5)
+        bound_tier1 = get_tier_percentage_bound(subset[AVG_ATLITE_LATITUDE_VARIABLE_NAME].values,subset[AVG_ATLITE_LONGITUDE_VARIABLE_NAME].values,copy.deepcopy(subset_full_dataset), selected_indexes_tier1,DATA_VARIABLE_NAME)
+        bound_tier2 = get_tier_percentage_bound(subset[AVG_ATLITE_LATITUDE_VARIABLE_NAME].values,subset[AVG_ATLITE_LONGITUDE_VARIABLE_NAME].values,copy.deepcopy(subset_full_dataset), selected_indexes_tier2,DATA_VARIABLE_NAME)
+        bound_tier3 = get_tier_percentage_bound(subset[AVG_ATLITE_LATITUDE_VARIABLE_NAME].values,subset[AVG_ATLITE_LONGITUDE_VARIABLE_NAME].values,copy.deepcopy(subset_full_dataset), selected_indexes_tier3,DATA_VARIABLE_NAME)
+        bound_tier4 = get_tier_percentage_bound(subset[AVG_ATLITE_LATITUDE_VARIABLE_NAME].values,subset[AVG_ATLITE_LONGITUDE_VARIABLE_NAME].values,copy.deepcopy(subset_full_dataset), selected_indexes_tier4,DATA_VARIABLE_NAME)
+        bound_tier5 = get_tier_percentage_bound(subset[AVG_ATLITE_LATITUDE_VARIABLE_NAME].values,subset[AVG_ATLITE_LONGITUDE_VARIABLE_NAME].values,copy.deepcopy(subset_full_dataset), selected_indexes_tier5,DATA_VARIABLE_NAME)
 
         # Create a DataFrame
         tier_dataframe_option_6 = pd.DataFrame({
@@ -344,7 +354,7 @@ def calculate_valid_tiers(atlite_data,atlite_data_avg,points_geometry,geometry):
 ## Helper function: visualize geometries
 #################################################
 # dash app
-def visualize_geometries(geographical_bounds_atlite_data,geometry_table_list,valid_output_tiers,geometry_layer_list,graph_tier_list):
+def visualize_geometries(geographical_bounds_atlite_data,geometry_table_list,geometry_layer_list,graph_tier_list):
     # create app
     app = dash.Dash(__name__)
 
@@ -479,7 +489,7 @@ def visualize_geometries(geographical_bounds_atlite_data,geometry_table_list,val
 ################################################################
 # Helper function: Split tiers according to percentage bounds:
 ################################################################
-def get_tier_percentage_bound(lats,longs,atlite_data,selected_data):
+def get_tier_percentage_bound(lats,longs,atlite_data,selected_data,DATA_VARIABLE_NAME):
     """
 
     :param lats: list of latitudes
@@ -491,7 +501,7 @@ def get_tier_percentage_bound(lats,longs,atlite_data,selected_data):
     # count as the values get added on to take the average at the end
     number_columns_in_tier = 0
     # skeleton to hold the values
-    cumulative_average_values = np.zeros((len(atlite_data[os.environ.get("DATA_VARIABLE_NAME")].values[:,0,0])))
+    cumulative_average_values = np.zeros((len(atlite_data[DATA_VARIABLE_NAME].values[:,0,0])))
 
     # loop through and find if nan or data
     for lat in range(len(lats)):
@@ -501,7 +511,7 @@ def get_tier_percentage_bound(lats,longs,atlite_data,selected_data):
                 continue
             else:
                 # Add the new column to the skeleton column
-                cumulative_average_values += atlite_data[os.environ.get("DATA_VARIABLE_NAME")].values[:, lat, lon]
+                cumulative_average_values += atlite_data[DATA_VARIABLE_NAME].values[:, lat, lon]
                 number_columns_in_tier += 1
 
     # take the average
@@ -512,7 +522,7 @@ def get_tier_percentage_bound(lats,longs,atlite_data,selected_data):
 ## Option 6: main function to process geometries
 #################################################
 
-def option_6_process_geometries_into_tiers():
+def option_6_process_geometries_into_tiers(AVG_ATLITE_LONGITUDE_VARIABLE_NAME, AVG_ATLITE_LATITUDE_VARIABLE_NAME, AVG_ATLITE_DATA_VARIABLE_NAME, PERCENT_UPPER_TIER1_CAPACITY_FACTORS, PERCENT_UPPER_TIER2_CAPACITY_FACTORS, PERCENT_UPPER_TIER3_CAPACITY_FACTORS, PERCENT_UPPER_TIER4_CAPACITY_FACTORS, PERCENT_UPPER_TIER5_CAPACITY_FACTORS, DATA_VARIABLE_NAME, OPTION_6_USER_GEOMETRIES_GEOJSON_FILE, OPTION_6_OUTPUT_FOLDER, ATLITE_DUMMY_DATA, DUMMY_START_DATE, DUMMY_END_DATE, DUMMY_LATITUDE_BOTTOM, DUMMY_LATITUDE_TOP, DUMMY_LONGITUDE_LEFT, DUMMY_LONGITUDE_RIGHT, MAXIMUM_CAPACITY, TIME_VARIABLE_NAME, AVG_ATLITE_CAPACITY_FACTORS_FILE_LOCATION, SCALE_CAPACITY_FACTORS, OPTION_6_OUTPUT_TIERS_FILE, OPTION_6_GEOMETRY_REFERENCE_FILE, OPTION_6_VIEW_VALID_GEOMETRIES):
     """
     Main function for the processing of geometries into tiers
 
@@ -520,7 +530,7 @@ def option_6_process_geometries_into_tiers():
     """
 
     # Define the path to the GeoJSON file
-    geojson_path = os.environ.get("OPTION_6_USER_GEOMETRIES_GEOJSON_FILE")
+    geojson_path = OPTION_6_USER_GEOMETRIES_GEOJSON_FILE
 
     # open the file
     try:
@@ -530,18 +540,18 @@ def option_6_process_geometries_into_tiers():
         raise ValueError("Could not read the geometry geojson file. Please check the file name and geometry content. Full error: " + str(e))
 
     # check if output directories are created
-    if not os.path.exists(os.environ.get('OPTION_6_OUTPUT_FOLDER')):
-        os.makedirs(os.environ.get('OPTION_6_OUTPUT_FOLDER'))
+    if not os.path.exists(OPTION_6_OUTPUT_FOLDER):
+        os.makedirs(OPTION_6_OUTPUT_FOLDER)
 
     ########################################################################
     ## open atlite capacity factor data
     ########################################################################
     # open the averaged atlite capacity factor data
-    atlite_capacity_factors, atlite_capacity_factors_avg = support_functions.create_average_capacity_factor_file_atlite(os.environ.get('ATLITE_DUMMY_DATA'),os.environ.get("DUMMY_START_DATE"),os.environ.get("DUMMY_END_DATE"),os.environ.get("DUMMY_LATITUDE_BOTTOM"),os.environ.get("DUMMY_LATITUDE_TOP"),os.environ.get("DUMMY_LONGITUDE_LEFT"),os.environ.get("DUMMY_LONGITUDE_RIGHT"),os.environ.get("MAXIMUM_CAPACITY"),os.environ.get("DATA_VARIABLE_NAME"),os.environ.get("TIME_VARIABLE_NAME"),os.environ.get("AVG_ATLITE_CAPACITY_FACTORS_FILE_LOCATION"))
+    atlite_capacity_factors, atlite_capacity_factors_avg = support_functions.create_average_capacity_factor_file_atlite(ATLITE_DUMMY_DATA,DUMMY_START_DATE,DUMMY_END_DATE,DUMMY_LATITUDE_BOTTOM,DUMMY_LATITUDE_TOP,DUMMY_LONGITUDE_LEFT,DUMMY_LONGITUDE_RIGHT,MAXIMUM_CAPACITY,DATA_VARIABLE_NAME,TIME_VARIABLE_NAME,AVG_ATLITE_CAPACITY_FACTORS_FILE_LOCATION)
     print("... Read averaged atlite capacity factor data.\n")
 
     # Call the function to check if each geometry is within the bounds
-    inside_or_outside = check_geojson_within_bounds(geojson_data, atlite_capacity_factors)
+    inside_or_outside = check_geojson_within_bounds(geojson_data, atlite_capacity_factors, AVG_ATLITE_LONGITUDE_VARIABLE_NAME, AVG_ATLITE_LATITUDE_VARIABLE_NAME)
 
     # Initialize a list to store visualization table data
     geometry_table_list = []
@@ -557,10 +567,10 @@ def option_6_process_geometries_into_tiers():
     ########################################################################
     # add the bounding box user should stay within
     # Get the maximum and minimum latitude and longitude values
-    max_latitude = atlite_capacity_factors[os.environ.get("AVG_ATLITE_LATITUDE_VARIABLE_NAME")].max().values
-    min_latitude = atlite_capacity_factors[os.environ.get("AVG_ATLITE_LATITUDE_VARIABLE_NAME")].min().values
-    max_longitude = atlite_capacity_factors[os.environ.get("AVG_ATLITE_LONGITUDE_VARIABLE_NAME")].max().values
-    min_longitude = atlite_capacity_factors[os.environ.get("AVG_ATLITE_LONGITUDE_VARIABLE_NAME")].min().values
+    max_latitude = atlite_capacity_factors[AVG_ATLITE_LATITUDE_VARIABLE_NAME].max().values
+    min_latitude = atlite_capacity_factors[AVG_ATLITE_LATITUDE_VARIABLE_NAME].min().values
+    max_longitude = atlite_capacity_factors[AVG_ATLITE_LONGITUDE_VARIABLE_NAME].max().values
+    min_longitude = atlite_capacity_factors[AVG_ATLITE_LONGITUDE_VARIABLE_NAME].min().values
 
     # Loop through each geometry in the GeoJSON file
     # add table entry and geometry on map and create tiers data
@@ -598,7 +608,7 @@ def option_6_process_geometries_into_tiers():
             if is_within_bounds:
                 print("------------------------------------------------")
                 print(tier_label," is a POLYGON")
-                potential_tier = calculate_valid_tiers(atlite_capacity_factors,atlite_capacity_factors_avg,row['geometry'],geometry_type)
+                potential_tier = calculate_valid_tiers(atlite_capacity_factors,atlite_capacity_factors_avg,row['geometry'],geometry_type,AVG_ATLITE_LATITUDE_VARIABLE_NAME, AVG_ATLITE_LONGITUDE_VARIABLE_NAME, AVG_ATLITE_DATA_VARIABLE_NAME, PERCENT_UPPER_TIER1_CAPACITY_FACTORS, PERCENT_UPPER_TIER2_CAPACITY_FACTORS, PERCENT_UPPER_TIER3_CAPACITY_FACTORS, PERCENT_UPPER_TIER4_CAPACITY_FACTORS, PERCENT_UPPER_TIER5_CAPACITY_FACTORS, DATA_VARIABLE_NAME)
                 if potential_tier is not None:
                     print("... Tier generated successfully for ",tier_label)
                     graph_tier_list.append({tier_label:potential_tier})
@@ -608,13 +618,13 @@ def option_6_process_geometries_into_tiers():
                     print("\n... Finished compiling tier: ",tier_label,": successfully:")
 
                     # scale capacity factors if required:
-                    if os.environ.get('SCALE_CAPACITY_FACTORS').lower() == "true":
-                        valid_output_tiers = valid_output_tiers / float(os.environ.get("MAXIMUM_CAPACITY"))  # divide by the weightings
-                        print("\n... Capacity factors were scaled by division of maximum capacity:",os.environ.get("MAXIMUM_CAPACITY"))
+                    if SCALE_CAPACITY_FACTORS.lower() == "true":
+                        valid_output_tiers = valid_output_tiers / float(MAXIMUM_CAPACITY)  # divide by the weightings
+                        print("\n... Capacity factors were scaled by division of maximum capacity:",MAXIMUM_CAPACITY)
 
                     # Save tiers to csv file
-                    valid_output_tiers.to_csv(os.path.join(os.environ.get('OPTION_6_OUTPUT_FOLDER'),str(tier_label)+"_"+os.environ.get("OPTION_6_OUTPUT_TIERS_FILE")))
-                    print("\n... Saved output tiers file to:", os.path.join(os.environ.get('OPTION_6_OUTPUT_FOLDER'),str(tier_label)+"_"+os.environ.get("OPTION_6_OUTPUT_TIERS_FILE")))
+                    valid_output_tiers.to_csv(os.path.join(OPTION_6_OUTPUT_FOLDER,str(tier_label)+"_"+OPTION_6_OUTPUT_TIERS_FILE))
+                    print("\n... Saved output tiers file to:", os.path.join(OPTION_6_OUTPUT_FOLDER,str(tier_label)+"_"+OPTION_6_OUTPUT_TIERS_FILE))
 
                     # otherwise, no tier for this point
                 else:
@@ -663,7 +673,7 @@ def option_6_process_geometries_into_tiers():
             if is_within_bounds:
                 print("------------------------------------------------")
                 print(tier_label," is a POINT")
-                potential_tier = calculate_valid_tiers(atlite_capacity_factors,atlite_capacity_factors_avg, row['geometry'], geometry_type)
+                potential_tier = calculate_valid_tiers(atlite_capacity_factors,atlite_capacity_factors_avg, row['geometry'], geometry_type,AVG_ATLITE_LATITUDE_VARIABLE_NAME, AVG_ATLITE_LONGITUDE_VARIABLE_NAME, AVG_ATLITE_DATA_VARIABLE_NAME, PERCENT_UPPER_TIER1_CAPACITY_FACTORS, PERCENT_UPPER_TIER2_CAPACITY_FACTORS, PERCENT_UPPER_TIER3_CAPACITY_FACTORS, PERCENT_UPPER_TIER4_CAPACITY_FACTORS, PERCENT_UPPER_TIER5_CAPACITY_FACTORS, DATA_VARIABLE_NAME)
                 if potential_tier is not None:
                     print("... Tier generated successfully for ",tier_label)
                     graph_tier_list.append({tier_label:potential_tier})
@@ -673,14 +683,14 @@ def option_6_process_geometries_into_tiers():
                     print("\n... Finished compiling tier: ",tier_label,": successfully:")
 
                     # scale capacity factors if required:
-                    if os.environ.get('SCALE_CAPACITY_FACTORS').lower() == "true":
-                        valid_output_tiers = valid_output_tiers / float(os.environ.get("MAXIMUM_CAPACITY"))  # divide by the weightings
-                        print("\n... Capacity factors were scaled by division of maximum capacity:",os.environ.get("MAXIMUM_CAPACITY"))
+                    if SCALE_CAPACITY_FACTORS.lower() == "true":
+                        valid_output_tiers = valid_output_tiers / float(MAXIMUM_CAPACITY)  # divide by the weightings
+                        print("\n... Capacity factors were scaled by division of maximum capacity:",MAXIMUM_CAPACITY)
 
 
                     # Save tiers to csv file
-                    valid_output_tiers.to_csv(os.path.join(os.environ.get('OPTION_6_OUTPUT_FOLDER'),str(tier_label)+"_"+os.environ.get("OPTION_6_OUTPUT_TIERS_FILE")))
-                    print("... Saved output tiers file to:", os.path.join(os.environ.get('OPTION_6_OUTPUT_FOLDER'),str(tier_label)+"_"+os.environ.get("OPTION_6_OUTPUT_TIERS_FILE")))
+                    valid_output_tiers.to_csv(os.path.join(OPTION_6_OUTPUT_FOLDER,str(tier_label)+"_"+OPTION_6_OUTPUT_TIERS_FILE))
+                    print("... Saved output tiers file to:", os.path.join(OPTION_6_OUTPUT_FOLDER,str(tier_label)+"_"+OPTION_6_OUTPUT_TIERS_FILE))
 
                     # otherwise, no tier for this point
                 else:
@@ -694,22 +704,22 @@ def option_6_process_geometries_into_tiers():
     geometry_table_df = pd.DataFrame(geometry_table_list)
 
     # Save the DataFrame to a CSV file
-    geometry_table_df.to_csv(os.path.join(os.environ.get('OPTION_6_OUTPUT_FOLDER'),os.environ.get("OPTION_6_GEOMETRY_REFERENCE_FILE")))
+    geometry_table_df.to_csv(os.path.join(OPTION_6_OUTPUT_FOLDER,OPTION_6_GEOMETRY_REFERENCE_FILE))
 
 
-    print("\n... Saved output reference geometry file to:",os.path.join(os.environ.get('OPTION_6_OUTPUT_FOLDER'),os.environ.get("OPTION_6_GEOMETRY_REFERENCE_FILE")))
+    print("\n... Saved output reference geometry file to:",os.path.join(OPTION_6_OUTPUT_FOLDER,OPTION_6_GEOMETRY_REFERENCE_FILE))
     print("... Tier generation completed successfully!")
     print("\nOption_6 completed successfully!")
     print("----------------------------------------------------------------\n")
 
 
 
-    if os.environ.get('OPTION_6_VIEW_VALID_GEOMETRIES').lower() == "true":
+    if OPTION_6_VIEW_VALID_GEOMETRIES.lower() == "true":
         print("\nVisualization starting up ...")
         # build the Atlite bounding box:
         geographical_bounds_atlite_data = [[min_latitude, min_longitude], [max_latitude, max_longitude]]
         #visualize with Dash
-        visualize_geometries(geographical_bounds_atlite_data,geometry_table_list,valid_output_tiers,geometry_layer_list,graph_tier_list)
+        visualize_geometries(geographical_bounds_atlite_data,geometry_table_list,geometry_layer_list,graph_tier_list)
     else:
         print("\nNo visualization selected. If you want to visualize thedata set the OPTION_6_VIEW_VALID_GEOMETRIES to true.")
 
@@ -740,6 +750,6 @@ if __name__ == '__main__':
             raise ValueError("COULD NOT FIND ARGS OR LOAD ENV FILE. USER ARGS OR ENV FILE MISSING.")
 
     # args example use:
-    # python Option_5_step2_tier_generation_average_per_geometry.py --AVG_ATLITE_LONGITUDE_VARIABLE_NAME longitude --AVG_ATLITE_LATITUDE_VARIABLE_NAME latitude --AVG_ATLITE_DATA_VARIABLE_NAME capacity_factors --OPTION_5_USER_GEOMETRIES_GEOJSON_FILE "assets/user_geometry/example.geojson" --ATLITE_DUMMY_DATA True  --DUMMY_START_DATE  '2023-01-01' --DUMMY_END_DATE '2024-01-01'  --DUMMY_LATITUDE_BOTTOM  -32 --DUMMY_LATITUDE_TOP -30  --DUMMY_LONGITUDE_LEFT 26  --DUMMY_LONGITUDE_RIGHT 28   --MAXIMUM_CAPACITY  50 --DATA_VARIABLE_NAME capacity_factors  --TIME_VARIABLE_NAME  time --AVG_ATLITE_CAPACITY_FACTORS_FILE_LOCATION "assets/avg_atlite_capacity_factors.nc" --OPTION_5_OUTPUT_FOLDER "assets/option_5_output" --SCALE_CAPACITY_FACTORS True --OPTION_5_OUTPUT_TIERS_FILE "option_5_single_tiers_per_geometry.csv" --OPTION_5_GEOMETRY_REFERENCE_FILE "option_5_geometry_reference_file.csv" --OPTION_5_VIEW_VALID_GEOMETRIES False
+    # python Option_6_step2_tier_generation_bounds_per_geometry.py --AVG_ATLITE_LONGITUDE_VARIABLE_NAME longitude --AVG_ATLITE_LATITUDE_VARIABLE_NAME latitude --AVG_ATLITE_DATA_VARIABLE_NAME capacity_factors --PERCENT_UPPER_TIER1_CAPACITY_FACTORS  0,10 --PERCENT_UPPER_TIER2_CAPACITY_FACTORS  10,20 --PERCENT_UPPER_TIER3_CAPACITY_FACTORS  0,40 --PERCENT_UPPER_TIER4_CAPACITY_FACTORS  60,100 --PERCENT_UPPER_TIER5_CAPACITY_FACTORS 40,60 --DATA_VARIABLE_NAME capacity_factors --OPTION_6_USER_GEOMETRIES_GEOJSON_FILE  "assets/user_geometry/example2.geojson" --OPTION_6_OUTPUT_FOLDER "assets/option_6_output"  --ATLITE_DUMMY_DATA True  --DUMMY_START_DATE  '2023-01-01' --DUMMY_END_DATE '2024-01-01'  --DUMMY_LATITUDE_BOTTOM  -32 --DUMMY_LATITUDE_TOP -30  --DUMMY_LONGITUDE_LEFT 26  --DUMMY_LONGITUDE_RIGHT 28   --MAXIMUM_CAPACITY  50  --TIME_VARIABLE_NAME  time --AVG_ATLITE_CAPACITY_FACTORS_FILE_LOCATION "assets/avg_atlite_capacity_factors.nc" --SCALE_CAPACITY_FACTORS True --OPTION_6_OUTPUT_TIERS_FILE  "option_6_multiple_tiers_per_geometry.csv" --OPTION_6_GEOMETRY_REFERENCE_FILE  "option_6_geometry_reference_file.csv"  --OPTION_6_VIEW_VALID_GEOMETRIES False
 
 
