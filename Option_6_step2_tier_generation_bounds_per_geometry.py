@@ -15,11 +15,95 @@ from dash import dash_table
 import copy
 import plotly.express as px
 from dotenv import load_dotenv
+import argparse
 
 import Option_Support_Functions as support_functions
 
-# Load variables from the .env file
-load_dotenv()
+################################
+# system args section
+################################
+# used for running the codes
+def parse_arguments():
+    parser = argparse.ArgumentParser(description="(Option 1) Script to calculate average capacity factors.")
+    parser.add_argument('--AVG_ATLITE_LONGITUDE_VARIABLE_NAME', default=None, required=False,help="Average ATLITE longitude variable name.")
+    parser.add_argument('--AVG_ATLITE_LATITUDE_VARIABLE_NAME', default=None, required=False,help="Average ATLITE latitude variable name.")
+    parser.add_argument('--AVG_ATLITE_DATA_VARIABLE_NAME', default=None, required=False,help="Average ATLITE data variable name.")
+    parser.add_argument('--OPTION_5_USER_GEOMETRIES_GEOJSON_FILE', default=None, required=False,help="User defined geometries as output from Step 1.")
+    parser.add_argument('--ATLITE_DUMMY_DATA', default=None, required=False, help="Boolean to use the dummy Atlite data (True) or not.")
+    parser.add_argument('--DUMMY_START_DATE', default=None, required=False, help="Start date.")
+    parser.add_argument('--DUMMY_END_DATE', default=None, required=False, help="End date.")
+    parser.add_argument('--DUMMY_LATITUDE_BOTTOM', default=None, required=False, help="Latitude bottom.")
+    parser.add_argument('--DUMMY_LATITUDE_TOP', default=None, required=False, help="Latitude top.")
+    parser.add_argument('--DUMMY_LONGITUDE_LEFT', default=None, required=False, help="Longitude left.")
+    parser.add_argument('--DUMMY_LONGITUDE_RIGHT', default=None, required=False, help="Longitude right.")
+    parser.add_argument('--MAXIMUM_CAPACITY', default=None, required=False, help="Maximum capacity.")
+    parser.add_argument('--DATA_VARIABLE_NAME', default=None, required=False, help="Data variable name.")
+    parser.add_argument('--TIME_VARIABLE_NAME', default=None, required=False, help="Time variable name.")
+    parser.add_argument('--AVG_ATLITE_CAPACITY_FACTORS_FILE_LOCATION', default=None, required=False,help="Average ATLITE capacity factors file location.")
+    parser.add_argument('--OPTION_5_OUTPUT_FOLDER', default=None, required=False, help="Option 5 output folder.")
+    parser.add_argument('--SCALE_CAPACITY_FACTORS', default=None, required=False, help="Scale capacity factors.")
+    parser.add_argument('--OPTION_5_OUTPUT_TIERS_FILE', default=None, required=False,help="Output tiers file.")
+    parser.add_argument('--OPTION_5_GEOMETRY_REFERENCE_FILE', default=None, required=False,help="Output geometry reference file.")
+    parser.add_argument('--OPTION_5_VIEW_VALID_GEOMETRIES', default=None, required=False,help="View geometryTrue or not False.")
+
+    # parse args
+    args = parser.parse_args()
+
+    # Check if all arguments are provided
+    if all(arg is None for arg in vars(args).values()):
+        raise ValueError("ERROR: All arguments are None!")
+
+    # Check if any of the arguments are provided
+    if any(arg is None for arg in vars(args).values()):
+        print("Warning only some arguments provided! Code may fail.")
+
+    return args
+
+
+def load_from_env():
+    # load data from .env file
+    load_dotenv()
+    env_vars =  {
+        "AVG_ATLITE_LONGITUDE_VARIABLE_NAME" : os.environ.get("AVG_ATLITE_LONGITUDE_VARIABLE_NAME"),
+        "AVG_ATLITE_LATITUDE_VARIABLE_NAME" : os.environ.get("AVG_ATLITE_LATITUDE_VARIABLE_NAME"),
+        "AVG_ATLITE_DATA_VARIABLE_NAME" : os.environ.get("AVG_ATLITE_DATA_VARIABLE_NAME"),
+        "OPTION_5_USER_GEOMETRIES_GEOJSON_FILE" : os.environ.get("OPTION_5_USER_GEOMETRIES_GEOJSON_FILE"),
+        "ATLITE_DUMMY_DATA" : os.environ.get("ATLITE_DUMMY_DATA"),
+        "DUMMY_START_DATE" : os.environ.get("DUMMY_START_DATE"),
+        "DUMMY_END_DATE" : os.environ.get("DUMMY_END_DATE"),
+        "DUMMY_LATITUDE_BOTTOM" : os.environ.get("DUMMY_LATITUDE_BOTTOM"),
+        "DUMMY_LATITUDE_TOP" : os.environ.get("DUMMY_LATITUDE_TOP"),
+        "DUMMY_LONGITUDE_LEFT" : os.environ.get("DUMMY_LONGITUDE_LEFT"),
+        "DUMMY_LONGITUDE_RIGHT" : os.environ.get("DUMMY_LONGITUDE_RIGHT"),
+        "MAXIMUM_CAPACITY" : os.environ.get("MAXIMUM_CAPACITY"),
+        "DATA_VARIABLE_NAME" : os.environ.get("DATA_VARIABLE_NAME"),
+        "TIME_VARIABLE_NAME" : os.environ.get("TIME_VARIABLE_NAME"),
+        "AVG_ATLITE_CAPACITY_FACTORS_FILE_LOCATION" : os.environ.get("AVG_ATLITE_CAPACITY_FACTORS_FILE_LOCATION"),
+        "OPTION_5_OUTPUT_FOLDER" : os.environ.get("OPTION_5_OUTPUT_FOLDER"),
+        "SCALE_CAPACITY_FACTORS" : os.environ.get("SCALE_CAPACITY_FACTORS"),
+        "OPTION_5_OUTPUT_TIERS_FILE" : os.environ.get("OPTION_5_OUTPUT_TIERS_FILE"),
+        "OPTION_5_GEOMETRY_REFERENCE_FILE" : os.environ.get("OPTION_5_GEOMETRY_REFERENCE_FILE"),
+        "OPTION_5_VIEW_VALID_GEOMETRIES" : os.environ.get("OPTION_5_VIEW_VALID_GEOMETRIES"),
+    }
+
+    # Store the names of variables that are None
+    unset_variables = []
+
+    for key, value in env_vars.items():
+        if value is None:
+            unset_variables.append(key)
+
+    if unset_variables:
+        print("WARNING: The following environment variables are not set in the .env file:")
+        for var in unset_variables:
+            print("...... -  ", var)
+
+    return env_vars
+
+
+################################################################
+# main codes:
+
 
 ########################################################################
 # Helper function: Check geometries, inside or outside bounding box
@@ -630,6 +714,32 @@ def option_6_process_geometries_into_tiers():
         print("\nNo visualization selected. If you want to visualize thedata set the OPTION_6_VIEW_VALID_GEOMETRIES to true.")
 
 if __name__ == '__main__':
-    print("Starting tier processing for Option 6: single tier per user defined geometry ...")
-    option_6_process_geometries_into_tiers()
+    print("Starting tier processing for Option 6: multiple tier per user defined geometry ...")
+    # check args or load env file and run codes
+    try:
+        print("TRYING TO USE ARGUMENTS")
+        args = parse_arguments()
+        print("ARGUMENTS FOUND. USING ARGUMENTS")
+
+        # RUN CODES
+        option_6_process_geometries_into_tiers(**vars(args))
+    except Exception as e:
+        print("ARGUMENTS NOT FOUND: ", e)
+        try:
+            print("TRYING TO LOAD ENV FILE VARIABLES")
+            # Load variables from the .env file
+            args = load_from_env()
+            print("ENV FILE FOUND. USING ENV FILE")
+
+            # RUN CODES
+            option_6_process_geometries_into_tiers(**args)
+
+        except Exception as e:
+            print("ENV FILE NOT FOUND: ", e)
+            print("ERROR ... USER ARGS AND ENV FILE NOT FOUND, ABORTING!")
+            raise ValueError("COULD NOT FIND ARGS OR LOAD ENV FILE. USER ARGS OR ENV FILE MISSING.")
+
+    # args example use:
+    # python Option_5_step2_tier_generation_average_per_geometry.py --AVG_ATLITE_LONGITUDE_VARIABLE_NAME longitude --AVG_ATLITE_LATITUDE_VARIABLE_NAME latitude --AVG_ATLITE_DATA_VARIABLE_NAME capacity_factors --OPTION_5_USER_GEOMETRIES_GEOJSON_FILE "assets/user_geometry/example.geojson" --ATLITE_DUMMY_DATA True  --DUMMY_START_DATE  '2023-01-01' --DUMMY_END_DATE '2024-01-01'  --DUMMY_LATITUDE_BOTTOM  -32 --DUMMY_LATITUDE_TOP -30  --DUMMY_LONGITUDE_LEFT 26  --DUMMY_LONGITUDE_RIGHT 28   --MAXIMUM_CAPACITY  50 --DATA_VARIABLE_NAME capacity_factors  --TIME_VARIABLE_NAME  time --AVG_ATLITE_CAPACITY_FACTORS_FILE_LOCATION "assets/avg_atlite_capacity_factors.nc" --OPTION_5_OUTPUT_FOLDER "assets/option_5_output" --SCALE_CAPACITY_FACTORS True --OPTION_5_OUTPUT_TIERS_FILE "option_5_single_tiers_per_geometry.csv" --OPTION_5_GEOMETRY_REFERENCE_FILE "option_5_geometry_reference_file.csv" --OPTION_5_VIEW_VALID_GEOMETRIES False
+
 
