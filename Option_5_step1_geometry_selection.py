@@ -325,6 +325,10 @@ def geometry_selection(ATLITE_DUMMY_DATA, DUMMY_START_DATE, DUMMY_END_DATE, DUMM
     app.run_server(debug=True)
 
 if __name__ == '__main__':
+    print("#########")
+    print("Option 5 Step 1")
+    print("#########")
+
     # check args or load env file and run codes
     try:
         print("TRYING TO USE ARGUMENTS")

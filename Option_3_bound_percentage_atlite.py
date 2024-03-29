@@ -216,6 +216,10 @@ def average_capacity_factors_atlite(ATLITE_DUMMY_DATA, DUMMY_START_DATE, DUMMY_E
 
 if __name__ == '__main__':
 
+    print("#########")
+    print("Option 3")
+    print("#########")
+
     # check args or load env file and run codes
     try:
         print("TRYING TO USE ARGUMENTS")
