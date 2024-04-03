@@ -20,6 +20,7 @@ import Option_Support_Functions as support_functions
 def parse_arguments():
     parser = argparse.ArgumentParser(description="(Option 3) Script to calculate average capacity factors.")
     parser.add_argument('--ATLITE_DUMMY_DATA', default=None, required=False,help="Boolean to use the dummy Atlite data (True) or not.")
+    parser.add_argument('--ATLITE_CAPACITY_FACTORS_FOLDERS', default=None, required=False,help="Folders continaing hourly Atlite data files needing stitching.")
     parser.add_argument('--DUMMY_START_DATE', default=None, required=False, help="Start date.")
     parser.add_argument('--DUMMY_END_DATE', default=None, required=False, help="End date.")
     parser.add_argument('--DUMMY_LATITUDE_BOTTOM', default=None, required=False, help="Latitude bottom.")
@@ -61,6 +62,7 @@ def load_from_env():
 
     env_vars = {
         'ATLITE_DUMMY_DATA': os.environ.get('ATLITE_DUMMY_DATA'),
+        "ATLITE_CAPACITY_FACTORS_FOLDERS" : os.environ.get("ATLITE_CAPACITY_FACTORS_FOLDERS"),
         'DUMMY_START_DATE': os.environ.get('DUMMY_START_DATE'),
         'DUMMY_END_DATE': os.environ.get('DUMMY_END_DATE'),
         'DUMMY_LATITUDE_BOTTOM': os.environ.get('DUMMY_LATITUDE_BOTTOM'),
@@ -101,9 +103,9 @@ def load_from_env():
 ################################################################
 # main codes:
 
-def average_capacity_factors_atlite(ATLITE_DUMMY_DATA, DUMMY_START_DATE, DUMMY_END_DATE, DUMMY_LATITUDE_BOTTOM, DUMMY_LATITUDE_TOP, DUMMY_LONGITUDE_LEFT, DUMMY_LONGITUDE_RIGHT, DATA_VARIABLE_NAME, TIME_VARIABLE_NAME, AVG_ATLITE_CAPACITY_FACTORS_FILE_LOCATION, PERCENT_UPPER_TIER1_CAPACITY_FACTORS, PERCENT_UPPER_TIER2_CAPACITY_FACTORS, PERCENT_UPPER_TIER3_CAPACITY_FACTORS, PERCENT_UPPER_TIER4_CAPACITY_FACTORS, PERCENT_UPPER_TIER5_CAPACITY_FACTORS, AVG_ATLITE_LATITUDE_VARIABLE_NAME, AVG_ATLITE_LONGITUDE_VARIABLE_NAME, OPTION_3_OUTPUT_FOLDER, MAXIMUM_CAPACITY, BOUND_CAPACITY_FACTORS_TIME_SERIES_FILE_3, SCALE_CAPACITY_FACTORS):
+def average_capacity_factors_atlite(ATLITE_DUMMY_DATA, ATLITE_CAPACITY_FACTORS_FOLDERS, DUMMY_START_DATE, DUMMY_END_DATE, DUMMY_LATITUDE_BOTTOM, DUMMY_LATITUDE_TOP, DUMMY_LONGITUDE_LEFT, DUMMY_LONGITUDE_RIGHT, DATA_VARIABLE_NAME, TIME_VARIABLE_NAME, AVG_ATLITE_CAPACITY_FACTORS_FILE_LOCATION, PERCENT_UPPER_TIER1_CAPACITY_FACTORS, PERCENT_UPPER_TIER2_CAPACITY_FACTORS, PERCENT_UPPER_TIER3_CAPACITY_FACTORS, PERCENT_UPPER_TIER4_CAPACITY_FACTORS, PERCENT_UPPER_TIER5_CAPACITY_FACTORS, AVG_ATLITE_LATITUDE_VARIABLE_NAME, AVG_ATLITE_LONGITUDE_VARIABLE_NAME, OPTION_3_OUTPUT_FOLDER, MAXIMUM_CAPACITY, BOUND_CAPACITY_FACTORS_TIME_SERIES_FILE_3, SCALE_CAPACITY_FACTORS):
     # average the capacity factors according to time:
-    atlite_capacity_factors, atlite_capacity_factors_avg = support_functions.create_average_capacity_factor_file_atlite(ATLITE_DUMMY_DATA,DUMMY_START_DATE,DUMMY_END_DATE,DUMMY_LATITUDE_BOTTOM,DUMMY_LATITUDE_TOP,DUMMY_LONGITUDE_LEFT,DUMMY_LONGITUDE_RIGHT,MAXIMUM_CAPACITY,DATA_VARIABLE_NAME,TIME_VARIABLE_NAME,AVG_ATLITE_CAPACITY_FACTORS_FILE_LOCATION)
+    atlite_capacity_factors, atlite_capacity_factors_avg = support_functions.create_average_capacity_factor_file_atlite(ATLITE_DUMMY_DATA, ATLITE_CAPACITY_FACTORS_FOLDERS,DUMMY_START_DATE,DUMMY_END_DATE,DUMMY_LATITUDE_BOTTOM,DUMMY_LATITUDE_TOP,DUMMY_LONGITUDE_LEFT,DUMMY_LONGITUDE_RIGHT,MAXIMUM_CAPACITY,DATA_VARIABLE_NAME,TIME_VARIABLE_NAME,AVG_ATLITE_CAPACITY_FACTORS_FILE_LOCATION)
     print("... Averaged atlite capacity factor data.")
 
 

@@ -75,7 +75,7 @@ def process_csv_files(folder_path,file_size_too_big):
             if file.endswith(".csv"):
                 file_path = os.path.join(root, file)
                 file_size = os.path.getsize(file_path)
-                if file_size <= 100 * 1024 * 1024:  # 100 MB
+                if file_size <= 50 * 1024 * 1024:  # 50 MB
                     df = pd.read_csv(file_path)
                     if 'tier_1' in df.columns:
                         fig = px.line(df, x=df.index, y=df.columns, title=f'File: {file}')

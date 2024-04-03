@@ -28,7 +28,6 @@ def create_temporary_atlite_dataset(DUMMY_START_DATE,DUMMY_END_DATE,DUMMY_LATITU
     # Step 1: Create hourly date times in a Pandas series
     hourly_date_times = pd.date_range(start=DUMMY_START_DATE, end=DUMMY_END_DATE, freq='H')
 
-
     """ temporary fix start """
     # Step 2: Create equally spaced intervals of 0.1 degrees between latitudes and longitudes
     latitude_intervals = np.arange(float(DUMMY_LATITUDE_BOTTOM), float(DUMMY_LATITUDE_TOP), 0.1)
@@ -49,9 +48,6 @@ def create_temporary_atlite_dataset(DUMMY_START_DATE,DUMMY_END_DATE,DUMMY_LATITU
 
     # Step 4: Loop through each hourly timestep and generate random data
     for i, time in enumerate(hourly_date_times):
-        # print("At timestep: ",i)
-        #### Step 1:
-        # TODO: Link to Nicolene's algorithm here
         """ temporary fix """
         capacity_factors, maximum_capacity = generate_random_data(latitude_intervals, longitude_intervals,MAXIMUM_CAPACITY)
         atlite_capacity_factors[DATA_VARIABLE_NAME][i, :, :] = capacity_factors
@@ -62,17 +58,78 @@ def create_temporary_atlite_dataset(DUMMY_START_DATE,DUMMY_END_DATE,DUMMY_LATITU
     return atlite_capacity_factors
 
 
-# Atlite data
-def create_average_capacity_factor_file_atlite(ATLITE_DUMMY_DATA,DUMMY_START_DATE,DUMMY_END_DATE,DUMMY_LATITUDE_BOTTOM,DUMMY_LATITUDE_TOP,DUMMY_LONGITUDE_LEFT,DUMMY_LONGITUDE_RIGHT,MAXIMUM_CAPACITY,DATA_VARIABLE_NAME,TIME_VARIABLE_NAME,AVG_ATLITE_CAPACITY_FACTORS_FILE_LOCATION):
-    # TODO: read in the capacity factors after running WP3 codes:
+def stitch_Atlite_data(ATLITE_CAPACITY_FACTORS_FOLDERS,DUMMY_START_DATE,DATA_VARIABLE_NAME):
+    # Split the folder string by commas to get individual folder paths
+    folders = ATLITE_CAPACITY_FACTORS_FOLDERS.split(',')
 
+    # # Create an empty list to store all data arrays before stitchingthem together in xarray
+    data_array = []
+
+    def sort_filenames(filename):
+        # Extract the numerical part of the filename, because it sorts 0, 1, 10, 100 etc. but we want 1, 2, 3, 4 ...
+        return int(filename.split('_')[-1].split('.')[0])
+
+    # Iterate through each folder
+    for index,folder in enumerate(folders):
+        print("... Busy reading files of folder ",index+1, " out of ",len(folders))
+        # Get all CSV files in the folder
+        csv_files = [file for file in os.listdir(folder) if file.endswith('.csv')]
+
+        # Sort CSV files numerically
+        csv_files.sort(key=sort_filenames)
+
+        # Iterate through each CSV file
+        for csv_file in csv_files:
+            # Read CSV file into a pandas DataFrame
+            df = pd.read_csv(os.path.join(folder, csv_file), header=None)
+            # print(df)
+
+            # Extract longitude from the first row and latitude from the first column
+            lon = [float(x) for x in df.iloc[0,:].values[1:]] # get the first row, then get values otherwise same name as dimension error, remove the first value from the data as it is the header, and type cast all to float because the header makes it all strings and not numbers
+            lat = [float(x) for x in df.iloc[:,0].values[1:]]
+            # print(lon, lat)
+            # 1/0
+
+            # Remove the first row and column (latitude and longitude)
+            df = df.iloc[1:, 1:]
+            # get the remaining values
+            data_slice = df.values
+            # append to list before pulling all values together
+            data_array.append(data_slice)
+
+
+    # Concatenate the list of arrays along a new axis
+    concatenated_data = np.stack(data_array, axis=-1)
+    # print(concatenated_data.shape)
+
+    # Combine all data arrays into a single xarray dataset
+    print("Stitching all data together ...")
+    Atlite_data = xr.Dataset(
+        {
+            DATA_VARIABLE_NAME: (["time", "latitude", "longitude"], np.transpose(concatenated_data, (2, 0, 1))),
+        },
+        coords={
+            "time": range(0, len(concatenated_data[0,0,:])),
+            "latitude": lat,
+            "longitude": lon,
+        },
+    )
+
+    # # Save the xarray dataset to netCDF format
+    # ds.to_netcdf('avg_data.nc')
+
+    return Atlite_data
+
+# Atlite data
+def create_average_capacity_factor_file_atlite(ATLITE_DUMMY_DATA, ATLITE_CAPACITY_FACTORS_FOLDERS,DUMMY_START_DATE,DUMMY_END_DATE,DUMMY_LATITUDE_BOTTOM,DUMMY_LATITUDE_TOP,DUMMY_LONGITUDE_LEFT,DUMMY_LONGITUDE_RIGHT,MAXIMUM_CAPACITY,DATA_VARIABLE_NAME,TIME_VARIABLE_NAME,AVG_ATLITE_CAPACITY_FACTORS_FILE_LOCATION):
+    # Read in the capacity factors after running WP3 codes:
     if ATLITE_DUMMY_DATA.lower() == 'true':
         ## use temp data for now:
         atlite_capacity_factors = create_temporary_atlite_dataset(DUMMY_START_DATE,DUMMY_END_DATE,DUMMY_LATITUDE_BOTTOM,DUMMY_LATITUDE_TOP,DUMMY_LONGITUDE_LEFT,DUMMY_LONGITUDE_RIGHT,MAXIMUM_CAPACITY,DATA_VARIABLE_NAME)
         print("... Opened DUMMY atlite capacity factor data.")
     else:
-        ## use temp data for now:
-        atlite_capacity_factors = create_temporary_atlite_dataset(DUMMY_START_DATE,DUMMY_END_DATE,DUMMY_LATITUDE_BOTTOM,DUMMY_LATITUDE_TOP,DUMMY_LONGITUDE_LEFT,DUMMY_LONGITUDE_RIGHT,MAXIMUM_CAPACITY,DATA_VARIABLE_NAME)
+        # use real data
+        atlite_capacity_factors = stitch_Atlite_data(ATLITE_CAPACITY_FACTORS_FOLDERS,DUMMY_START_DATE,DATA_VARIABLE_NAME)
         print("... Opened atlite capacity factor data.")
 
     # average the capacity factors according to time:
@@ -209,5 +266,8 @@ def read_masks_as_folium_layers(MASKS_FOLDER):
 
     return final_layers
 
-
+# if __name__ == '__main__':
+#     test_stitch = stitch_Atlite_data("atlite_output_data\output_month_1_Jan_2023\hourly_capacity_factors,atlite_output_data\output_month_2_Jan_2023\hourly_capacity_factors,atlite_output_data\output_month_3_Jan_2023\hourly_capacity_factors,atlite_output_data\output_month_4_Jan_2023\hourly_capacity_factors,atlite_output_data\output_month_5_Jan_2023\hourly_capacity_factors,atlite_output_data\output_month_6_Jan_2023\hourly_capacity_factors,atlite_output_data\output_month_7_Jan_2023\hourly_capacity_factors,atlite_output_data\output_month_8_Jan_2023\hourly_capacity_factors,atlite_output_data\output_month_9_Jan_2023\hourly_capacity_factors,atlite_output_data\output_month_10_Jan_2023\hourly_capacity_factors,atlite_output_data\output_month_11_Jan_2023\hourly_capacity_factors,atlite_output_data\output_month_12_Jan_2023\hourly_capacity_factors",'2023-01-01',"capacity_factors")
+#     # test_stitch = stitch_Atlite_data("atlite_output_data\output_month_9_Jan_2023\hourly_capacity_factors,atlite_output_data\output_month_10_Jan_2023\hourly_capacity_factors,atlite_output_data\output_month_11_Jan_2023\hourly_capacity_factors,atlite_output_data\output_month_12_Jan_2023\hourly_capacity_factors",'2023-01-01',"capacity_factors")
+#     print(test_stitch)
 

@@ -16,4 +16,6 @@ assets/option_5_output/
 assets/option_6_output/
 assets/option_7_output/
 
+atlite_output_data/*
+
 __pycache__

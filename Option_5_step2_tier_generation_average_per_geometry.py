@@ -24,6 +24,7 @@ import Option_Support_Functions as support_functions
 # used for running the codes
 def parse_arguments():
     parser = argparse.ArgumentParser(description="(Option 1) Script to calculate average capacity factors.")
+    parser.add_argument('--ATLITE_CAPACITY_FACTORS_FOLDERS', default=None, required=False,help="Folders continaing hourly Atlite data files needing stitching.")
     parser.add_argument('--AVG_ATLITE_LONGITUDE_VARIABLE_NAME', default=None, required=False,help="Average ATLITE longitude variable name.")
     parser.add_argument('--AVG_ATLITE_LATITUDE_VARIABLE_NAME', default=None, required=False,help="Average ATLITE latitude variable name.")
     parser.add_argument('--AVG_ATLITE_DATA_VARIABLE_NAME', default=None, required=False,help="Average ATLITE data variable name.")
@@ -63,6 +64,7 @@ def load_from_env():
     # load data from .env file
     load_dotenv()
     env_vars =  {
+        "ATLITE_CAPACITY_FACTORS_FOLDERS" : os.environ.get("ATLITE_CAPACITY_FACTORS_FOLDERS"),
         "AVG_ATLITE_LONGITUDE_VARIABLE_NAME" : os.environ.get("AVG_ATLITE_LONGITUDE_VARIABLE_NAME"),
         "AVG_ATLITE_LATITUDE_VARIABLE_NAME" : os.environ.get("AVG_ATLITE_LATITUDE_VARIABLE_NAME"),
         "AVG_ATLITE_DATA_VARIABLE_NAME" : os.environ.get("AVG_ATLITE_DATA_VARIABLE_NAME"),
@@ -312,6 +314,19 @@ def visualize_geometries(geographical_bounds_atlite_data,geometry_table_list,val
     ## Graphing of tiers
     #######################################
 
+    # check if the valid tiers is an empty dataframe:
+    if valid_output_tiers.empty:
+        print("... WARNING EMPTY TIERS FILE, CHECK IF ANY GEOMETRIES AE WITHIN THE BOUNDING BOX")
+        #fill with empty df:
+        # Create an example DataFrame
+        data = {
+            'Tier 1': [0, 0, 0],
+            'Tier 2': [0, 0, 0],
+            'Tier 3': [0, 0, 0]
+        }
+        index = ['Metric 1', 'Metric 2', 'Metric 3']
+        valid_output_tiers = pd.DataFrame(data, index=index)
+
     graphs = html.Div(id='graph-container', children=[
         html.H1("Tier Graphs",style={'textAlign': 'center',}),
         html.Div(id='graphs', children=[
@@ -347,7 +362,7 @@ def visualize_geometries(geographical_bounds_atlite_data,geometry_table_list,val
 ## Option 5: main function to process geometries
 #################################################
 
-def option_5_process_geometries_into_tiers(AVG_ATLITE_LONGITUDE_VARIABLE_NAME, AVG_ATLITE_LATITUDE_VARIABLE_NAME, AVG_ATLITE_DATA_VARIABLE_NAME, OPTION_5_USER_GEOMETRIES_GEOJSON_FILE, ATLITE_DUMMY_DATA, DUMMY_START_DATE, DUMMY_END_DATE, DUMMY_LATITUDE_BOTTOM, DUMMY_LATITUDE_TOP, DUMMY_LONGITUDE_LEFT, DUMMY_LONGITUDE_RIGHT, MAXIMUM_CAPACITY, DATA_VARIABLE_NAME, TIME_VARIABLE_NAME, AVG_ATLITE_CAPACITY_FACTORS_FILE_LOCATION, OPTION_5_OUTPUT_FOLDER, SCALE_CAPACITY_FACTORS, OPTION_5_OUTPUT_TIERS_FILE, OPTION_5_GEOMETRY_REFERENCE_FILE, OPTION_5_VIEW_VALID_GEOMETRIES):
+def option_5_process_geometries_into_tiers(ATLITE_CAPACITY_FACTORS_FOLDERS, AVG_ATLITE_LONGITUDE_VARIABLE_NAME, AVG_ATLITE_LATITUDE_VARIABLE_NAME, AVG_ATLITE_DATA_VARIABLE_NAME, OPTION_5_USER_GEOMETRIES_GEOJSON_FILE, ATLITE_DUMMY_DATA, DUMMY_START_DATE, DUMMY_END_DATE, DUMMY_LATITUDE_BOTTOM, DUMMY_LATITUDE_TOP, DUMMY_LONGITUDE_LEFT, DUMMY_LONGITUDE_RIGHT, MAXIMUM_CAPACITY, DATA_VARIABLE_NAME, TIME_VARIABLE_NAME, AVG_ATLITE_CAPACITY_FACTORS_FILE_LOCATION, OPTION_5_OUTPUT_FOLDER, SCALE_CAPACITY_FACTORS, OPTION_5_OUTPUT_TIERS_FILE, OPTION_5_GEOMETRY_REFERENCE_FILE, OPTION_5_VIEW_VALID_GEOMETRIES):
     # Define the path to the GeoJSON file
     geojson_path = OPTION_5_USER_GEOMETRIES_GEOJSON_FILE
 
@@ -362,7 +377,7 @@ def option_5_process_geometries_into_tiers(AVG_ATLITE_LONGITUDE_VARIABLE_NAME, A
     ## open atlite capacity factor data
     ########################################################################
     # open the averaged atlite capacity factor data
-    atlite_capacity_factors, atlite_capacity_factors_avg = support_functions.create_average_capacity_factor_file_atlite(ATLITE_DUMMY_DATA,DUMMY_START_DATE,DUMMY_END_DATE,DUMMY_LATITUDE_BOTTOM,DUMMY_LATITUDE_TOP,DUMMY_LONGITUDE_LEFT,DUMMY_LONGITUDE_RIGHT,MAXIMUM_CAPACITY,DATA_VARIABLE_NAME,TIME_VARIABLE_NAME,AVG_ATLITE_CAPACITY_FACTORS_FILE_LOCATION)
+    atlite_capacity_factors, atlite_capacity_factors_avg = support_functions.create_average_capacity_factor_file_atlite(ATLITE_DUMMY_DATA, ATLITE_CAPACITY_FACTORS_FOLDERS,DUMMY_START_DATE,DUMMY_END_DATE,DUMMY_LATITUDE_BOTTOM,DUMMY_LATITUDE_TOP,DUMMY_LONGITUDE_LEFT,DUMMY_LONGITUDE_RIGHT,MAXIMUM_CAPACITY,DATA_VARIABLE_NAME,TIME_VARIABLE_NAME,AVG_ATLITE_CAPACITY_FACTORS_FILE_LOCATION)
     print("... Read averaged atlite capacity factor data.\n")
 
     # Call the function to check if each geometry is within the bounds
