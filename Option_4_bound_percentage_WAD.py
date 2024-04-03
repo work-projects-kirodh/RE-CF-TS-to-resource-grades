@@ -125,6 +125,8 @@ def average_bounded_capacity_factors_WAD(ATLITE_DUMMY_DATA, ATLITE_CAPACITY_FACT
     atlite_capacity_factors, atlite_capacity_factors_avg = support_functions.create_average_capacity_factor_file_atlite(ATLITE_DUMMY_DATA, ATLITE_CAPACITY_FACTORS_FOLDERS,DUMMY_START_DATE,DUMMY_END_DATE,DUMMY_LATITUDE_BOTTOM,DUMMY_LATITUDE_TOP,DUMMY_LONGITUDE_LEFT,DUMMY_LONGITUDE_RIGHT,MAXIMUM_CAPACITY,DATA_VARIABLE_NAME,TIME_VARIABLE_NAME,AVG_ATLITE_CAPACITY_FACTORS_FILE_LOCATION)
     atlite_lats = atlite_capacity_factors[AVG_ATLITE_LATITUDE_VARIABLE_NAME]
     atlite_lons = atlite_capacity_factors[AVG_ATLITE_LONGITUDE_VARIABLE_NAME]
+
+
     print("... Read averaged atlite capacity factor data.")
 
     if REDUCED_WAD.lower() == "true":
@@ -142,21 +144,26 @@ def average_bounded_capacity_factors_WAD(ATLITE_DUMMY_DATA, ATLITE_CAPACITY_FACT
         # skeleton to hold the values
         cumulative_average_values = np.zeros((len(full_atlite_data[:,0,0])))
 
-        # loop through non-nan indexes and find the corresponding location in atlite data then cummalative average
+        # loop through non-nan indexes and find the corresponding location in atlite data then cumulative average
         for count_index, data_index in enumerate(non_nan_indexes):
             print("Busy with entry: ",count_index," out of ",len(non_nan_indexes))
 
             # find the closest index within the atlite data:
             closest_lat_index = np.argmin(np.abs(latitude_wad[data_index[0]]-atlite_lats.values))
             closest_lon_index = np.argmin(np.abs(longitude_wad[data_index[1]]-atlite_lons.values))
+            # print(closest_lat_index)
+            # print(closest_lon_index)
+            # print(latitude_wad[data_index[0]])
 
-            # donr need the actual value in this case:
+            # dont need the actual value in this case:
             # # value = full_atlite_data[data_index[0]][data_index[1]]
 
             # Add the new column to the skeleton column
+            # print(closest_lat_index,closest_lon_index)
+            # print(full_atlite_data[:, closest_lat_index, closest_lon_index])
             cumulative_average_values += full_atlite_data[:, closest_lat_index, closest_lon_index]
             number_columns_in_tier += 1
-
+            # print(cumulative_average_values)
         # take the average
         print("... A tier was created.")
         return cumulative_average_values/number_columns_in_tier
@@ -251,12 +258,12 @@ def average_bounded_capacity_factors_WAD(ATLITE_DUMMY_DATA, ATLITE_CAPACITY_FACT
     non_nan_indices_tier4 = np.argwhere(~np.isnan(selected_indexes_WAD_tier4.data))
     non_nan_indices_tier5 = np.argwhere(~np.isnan(selected_indexes_WAD_tier5.data))
 
-    # print("Non-nan indices")
-    # print(non_nan_indices_tier1,len(non_nan_indices_tier1))
-    # print(non_nan_indices_tier2,len(non_nan_indices_tier2))
-    # print(non_nan_indices_tier3,len(non_nan_indices_tier3))
-    # print(non_nan_indices_tier4,len(non_nan_indices_tier4))
-    # print(non_nan_indices_tier5,len(non_nan_indices_tier5))
+    print("Non-nan indices")
+    print(non_nan_indices_tier1,len(non_nan_indices_tier1))
+    print(non_nan_indices_tier2,len(non_nan_indices_tier2))
+    print(non_nan_indices_tier3,len(non_nan_indices_tier3))
+    print(non_nan_indices_tier4,len(non_nan_indices_tier4))
+    print(non_nan_indices_tier5,len(non_nan_indices_tier5))
 
     # # Generate the tiers using Atlite data:
     print("... Generating tier 1:")

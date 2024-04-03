@@ -85,13 +85,17 @@ def stitch_Atlite_data(ATLITE_CAPACITY_FACTORS_FOLDERS,DUMMY_START_DATE,DATA_VAR
             # print(df)
 
             # Extract longitude from the first row and latitude from the first column
-            lon = [float(x) for x in df.iloc[0,:].values[1:]] # get the first row, then get values otherwise same name as dimension error, remove the first value from the data as it is the header, and type cast all to float because the header makes it all strings and not numbers
-            lat = [float(x) for x in df.iloc[:,0].values[1:]]
+            ## Notes:
+            # - get the first row, then get values otherwise same name as dimension error,
+            # - remove the first two values from the data as it is the header and there is a blank line od nan or 0's in the second row and column,
+            # - and type cast all to float because the header makes it all strings and not numbers
+            lon = [float(x) for x in df.iloc[0,:].values[2:]]
+            lat = [float(x) for x in df.iloc[:,0].values[2:]]
             # print(lon, lat)
             # 1/0
 
-            # Remove the first row and column (latitude and longitude)
-            df = df.iloc[1:, 1:]
+            # Remove the first two rows and columns (latitude and longitude) and (empty lines for data second row and column)
+            df = df.iloc[2:, 2:]
             # get the remaining values
             data_slice = df.values
             # append to list before pulling all values together

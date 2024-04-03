@@ -459,7 +459,7 @@ def option_5_process_geometries_into_tiers(ATLITE_CAPACITY_FACTORS_FOLDERS, AVG_
                 'Tier': tier_label,
                 'Geometry Type': geometry_type,
                 'Coordinates': str(row['geometry']),
-                'Result': 'Outside',
+                'Result': 'Outside, Invalid',
             })
 
             # no tiers for line strings
