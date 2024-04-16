@@ -46,7 +46,7 @@ Parameters and variables can be set in the .env file. Or via the command line in
 - Option 7 (user defined): E.G. python Option_7_WAD_Atlite_correction_user_defined.py --WIND_ATLAS_DATA "path/to/WAD"  --ATLITE_DATA "path/to/Atlite/data"
 
 
-Viewing all tiers
+(Postprocessing) Viewing all tiers
 -------------------
 
 You can run the view_all_tiers.py script to show all the tiers of all the Options that were generated. These tiers are shown on a web browser interactive graph page.
@@ -64,7 +64,41 @@ Notes:
 - Please give step 1 for Option 5 and 6 some time before loading the map on the browser, it can take a while to read in the mask files. Dueto dash initially loading, it loads the data twice to ensure the cache is fulfilled, so please be patient!
 - The scripts for step 2 in Options 5 and 6, has a variable, OPTION_5_VIEW_VALID_GEOMETRIES and OPTION_6_VIEW_VALID_GEOMETRIES, which enables the user to visualize the map and geometries in the browser. The link to the page is shown in the console output as per example of this picture ![Link to show geometries and tiers on a web browser](assets/static/server_link.PNG)
 
-World Atlas Data preprep
+(Preprocessing) Wind Atlas Data preprep
+---------------------------
+
+- Before using the Wind Atlas data (netcdf file), it needs to be downloaded and saved to the assets folder. Youcan download a dataset from here:
+- https://globalwindatlas.info/en/download/gis-files
+- Download the tif file.
+- You will need gdal or qgis installed to process the wind atlas data tif file to netcdf. 
+- To do this in gdal: 
+- 1) Convert your tif file into a proper geotif file with a 2 dimensional layer using:
+- gdal_translate -b 1 -of GTiff D:\tempDownloads\ZAF_capacity-factor_IEC1.tif D:\tempDownloads\temp.tif
+- Translate the file into a netcdf file:
+- gdal_translate -of NetCDF -co "FORMAT=NC4" -a_nodata nan -a_srs EPSG:4326 -mo "Minimum=0.0185328294" -mo "Maximum=0.6504413486" D:\tempDownloads\temp.tif D:\tempDownloads\output.nc
+- 2) If you are using qgis, open the python console (Plugins --> Python Console) and run these commands (be sure to change the input_tif,temp_tif,output_nc file names, temp can be anything):
+  - import os 
+  - from osgeo import gdal
+  - input_tif = '/path/to/input.tif'
+  - temp_tif = '/path/to/temp.tif'
+  - output_nc = '/path/to/output.nc'
+  - input_ds = gdal.Open(input_tif)
+  - band = input_ds.GetRasterBand(1)
+  - array = band.ReadAsArray()
+  - cols = input_ds.RasterXSize
+  - rows = input_ds.RasterYSize
+  - driver = gdal.GetDriverByName('GTiff')
+  - output_ds = driver.Create(temp_tif, cols, rows, 1, band.DataType)
+  - output_ds.GetRasterBand(1).WriteArray(array)
+  - output_ds.SetGeoTransform(input_ds.GetGeoTransform())
+  - output_ds.SetProjection(input_ds.GetProjection())
+  - output_ds = None
+  - input_ds = None 
+  - gdal.Translate(output_nc, temp_tif, format='NetCDF', outputSRS='EPSG:4326',creationOptions=['FORMAT=NC4'])
+  - os.remove(temp_tif)
+
+
+(Preprocessing) Wind Atlas Data PNG preprep
 ---------------------------
 
 - To get the png pic that works, use qgis, style the map accordingly, and click project then import/export then export map to image.
@@ -73,7 +107,7 @@ World Atlas Data preprep
 - To obtain the netcdf file, use qgis to save the tiff as a netcdf file.
 
 
-Masks preparation
+(Preprocessing) Masks preparation
 ------------------
 
 As noted, only single band (not classified) .tif files used as masks, make sure they each have an extent. You can add as many as you want in the masks folder. A method is described in this readme on how to convert a classified raster to a single band raster.
