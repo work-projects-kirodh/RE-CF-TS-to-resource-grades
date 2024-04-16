@@ -69,6 +69,7 @@ Notes:
 
 - Before using the Wind Atlas data (netcdf file), it needs to be downloaded and saved to the assets folder. Youcan download a dataset from here:
 - https://globalwindatlas.info/en/download/gis-files
+- ![Wind Atlas Download](assets/static/wind_atlas_download.png))
 - Download the tif file.
 - You will need gdal or qgis installed to process the wind atlas data tif file to netcdf. 
 - To do this in gdal: 
