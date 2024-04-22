@@ -12,6 +12,8 @@ pillow
 pyproj
 python-dotenv
 branca
+scipy
+netCDF4
 #xarray~=0.18.2
 #pandas~=1.5.1
 #dash~=2.14.2
