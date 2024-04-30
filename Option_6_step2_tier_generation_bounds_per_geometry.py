@@ -24,7 +24,7 @@ import Option_Support_Functions as support_functions
 ################################
 # used for running the codes
 def parse_arguments():
-    parser = argparse.ArgumentParser(description="(Option 1) Script to calculate average capacity factors.")
+    parser = argparse.ArgumentParser(description="(Option 6 Step 2) Script to calculate average capacity factors.")
     parser.add_argument('--ATLITE_CAPACITY_FACTORS_FOLDERS', default=None, required=False,help="Folders continaing hourly Atlite data files needing stitching.")
     parser.add_argument('--AVG_ATLITE_LONGITUDE_VARIABLE_NAME', default=None, required=False,help="Average ATLITE longitude variable name.")
     parser.add_argument('--AVG_ATLITE_LATITUDE_VARIABLE_NAME', default=None, required=False,help="Average ATLITE latitude variable name.")

@@ -18,6 +18,8 @@ There are different tier options available:
 Scripts:
 ------------------------------------------------
 
+** **NEW**: Added user_input_template.py. This is a wrapper file for running the different options. This file has all the user input data for running the different options. The user just needs to fill in data and set the OPTION parameter to 1, 2, 3, 4, 5_1, 5_2, 6_1, 6_2 or 7. 
+
 This tool box consists of the following Python scripts:
 - Option 1: Option_1_upper_percentage_atlite.py prepares the capacity factor data from atlite. This will output an averaged over time capacity factor in the assets folder. This code will also find the top certain percentage capacity factor and average these to give you capacity factors you can use (option 1). Option 1A is also bundled in this code and works on bounded tiers. In the .env file there are 5 tiers which the user can choose certain bounds. Dont need to do step 2 or 3 if you are running option 1 or 1A.  
 - Option 2: Option_2_upper_percentage_WAD.py (optional, if you already have the geometries in geojson file, for option 2) provides an interactive map interface on your browser which allows the user to select their tiers. A geojson file needs to be exported. using the export button.

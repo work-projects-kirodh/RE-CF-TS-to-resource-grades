@@ -113,7 +113,7 @@ def geometry_selection(ATLITE_DUMMY_DATA, ATLITE_CAPACITY_FACTORS_FOLDERS, DUMMY
     ################################################################
 
     # create dash app
-    app = dash.Dash(__name__)
+    app = dash.Dash(__name__,prevent_initial_callbacks=True)
 
 
 

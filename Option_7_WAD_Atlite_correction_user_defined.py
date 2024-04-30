@@ -12,9 +12,9 @@ import argparse
 ################################
 # used for running the codes
 def parse_arguments():
-    parser = argparse.ArgumentParser(description="(Option 1) Script to calculate average capacity factors.")
-    parser.add_argument('--WIND_ATLAS_DATA', default=None, required=False, help="Wind Atlas data")
-    parser.add_argument('--ATLITE_DATA', default=None, required=False, help="Atlite data.")
+    parser = argparse.ArgumentParser(description="(Option 7) Script to calculate average capacity factors.")
+    parser.add_argument('--WIND_ATLAS_CAPACITY_FACTORS_HEATMAP_FILE_LOCATION', default=None, required=False, help="Wind Atlas data")
+    parser.add_argument('--ATLITE_CAPACITY_FACTORS_FOLDERS', default=None, required=False, help="Atlite data.")
 
     # parse args
     args = parser.parse_args()
@@ -34,8 +34,8 @@ def load_from_env():
     # load data from .env file
     load_dotenv()
     env_vars =  {
-        "WIND_ATLAS_DATA" : os.environ.get("WIND_ATLAS_DATA"),
-        "ATLITE_DATA" : os.environ.get("ATLITE_DATA"),
+        "WIND_ATLAS_DATA" : os.environ.get("WIND_ATLAS_CAPACITY_FACTORS_HEATMAP_FILE_LOCATION"),
+        "ATLITE_DATA" : os.environ.get("ATLITE_CAPACITY_FACTORS_FOLDERS"),
     }
     # if None in env_vars.values():
     #     # raise ValueError("One or more environment variables are not set in the .env file.")
@@ -59,7 +59,7 @@ def load_from_env():
 ################################################################
 # main codes:
 
-def wind_atlas_correction(WIND_ATLAS_DATA,ATLITE_DATA):
+def wind_atlas_correction(WIND_ATLAS_CAPACITY_FACTORS_HEATMAP_FILE_LOCATION,ATLITE_CAPACITY_FACTORS_FOLDERS):
     # 1. read in current timeseries
     # 2. read in wind atlas data
     # 3. do correction
